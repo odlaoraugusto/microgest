@@ -33,7 +33,6 @@ export default function PacientesListPage() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- refaz a
   // busca toda vez que o termo (com debounce) muda.
   useEffect(() => {
     carregar();

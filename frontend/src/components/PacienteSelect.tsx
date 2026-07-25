@@ -14,7 +14,6 @@ export default function PacienteSelect({ value, onChange }: PacienteSelectProps)
   const [carregando, setCarregando] = useState(false);
   const termoDebounced = useDebounce(termo, 350);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- dispara a
   // busca (com debounce) toda vez que o termo digitado muda.
   useEffect(() => {
     setCarregando(true);

@@ -58,7 +58,6 @@ export default function CcihPage() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega os
   // indicadores do período padrão (mês corrente) uma vez, na montagem.
   useEffect(() => {
     carregar();

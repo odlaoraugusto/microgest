@@ -58,7 +58,6 @@ function SecaoUsuarios({ souAdmin }: { souAdmin: boolean }) {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega a
   // lista de usuários uma vez, na montagem da aba.
   useEffect(() => {
     carregar();
@@ -218,7 +217,6 @@ function SecaoParametros({ souAdmin }: { souAdmin: boolean }) {
     setCarregando(false);
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega os
   // parâmetros do sistema uma vez, na montagem da aba.
   useEffect(() => {
     carregar();
@@ -298,7 +296,6 @@ function SecaoCatalogos({ souAdmin }: { souAdmin: boolean }) {
     setMateriais(materiaisRes.items);
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega os
   // catálogos de microrganismos, antimicrobianos, setores e materiais uma
   // vez, na montagem da aba.
   useEffect(() => {
@@ -518,7 +515,6 @@ function SecaoAuditoria({ souAdmin }: { souAdmin: boolean }) {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega os
   // logs de auditoria (se admin) uma vez, na montagem da aba; depende de
   // souAdmin, que só muda se o usuário logado mudar.
   useEffect(() => {

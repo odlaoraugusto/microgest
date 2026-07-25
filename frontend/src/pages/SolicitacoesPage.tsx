@@ -39,7 +39,6 @@ export default function SolicitacoesPage() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- recarrega a
   // lista toda vez que o filtro de status muda.
   useEffect(() => {
     carregar();

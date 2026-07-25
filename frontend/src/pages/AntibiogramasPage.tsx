@@ -34,7 +34,6 @@ export default function AntibiogramasPage() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega a
   // lista de antibiogramas uma vez, na montagem da página.
   useEffect(() => {
     carregar();

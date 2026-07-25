@@ -50,7 +50,6 @@ export default function MicrobiologiaPage() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- recarrega a
   // lista toda vez que a visão (Todas / Em andamento) muda.
   useEffect(() => {
     carregar();

@@ -41,7 +41,6 @@ export default function SolicitacaoFormPage() {
   const [materiaisCatalogo, setMateriaisCatalogo] = useState<string[]>([]);
   const [setoresCatalogo, setSetoresCatalogo] = useState<string[]>([]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega as
   // sugestões dos catálogos de material/setor uma vez, na montagem do form.
   useEffect(() => {
     listarMateriais().then((res) => setMateriaisCatalogo(res.items.map((m) => m.nome)));

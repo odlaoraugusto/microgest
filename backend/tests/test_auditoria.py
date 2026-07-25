@@ -21,6 +21,7 @@ def test_acoes_de_escrita_geram_log_de_auditoria(client):
     client.post(
         "/api/pacientes",
         json={"nome": "Paciente Auditado", "prontuario": "aud1"},
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     response = client.get(
@@ -36,7 +37,11 @@ def test_acoes_de_escrita_geram_log_de_auditoria(client):
 
 def test_log_registra_metodo_e_status_code(client):
     token = _criar_admin_e_logar(client)
-    client.post("/api/pacientes", json={"nome": "Paciente Log", "prontuario": "aud2"})
+    client.post(
+        "/api/pacientes",
+        json={"nome": "Paciente Log", "prontuario": "aud2"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
 
     response = client.get(
         "/api/auditoria/logs",

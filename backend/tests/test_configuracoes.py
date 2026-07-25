@@ -43,9 +43,9 @@ def test_atualizar_parametro_sem_ser_admin_falha(client):
     assert response.status_code == 401
 
 
-def test_dashboard_usa_fallback_quando_parametro_nao_existe(client):
+def test_dashboard_usa_fallback_quando_parametro_nao_existe(authenticated_client):
     # Sem o parâmetro semeado, o cálculo de prazo vencido deve continuar
     # funcionando normalmente usando o valor de fallback do código.
-    response = client.get("/api/dashboard/resumo")
+    response = authenticated_client.get("/api/dashboard/resumo")
     assert response.status_code == 200
     assert "prazo_vencido" in response.json()["data"]

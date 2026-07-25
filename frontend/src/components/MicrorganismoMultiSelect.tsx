@@ -23,7 +23,6 @@ export default function MicrorganismoMultiSelect({
     setCarregando(false);
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega o
   // catálogo de microrganismos uma vez, na montagem do seletor.
   useEffect(() => {
     carregar();

@@ -19,7 +19,6 @@ export default function ResultadosSIREditor({ value, onChange }: ResultadosSIREd
     setAntimicrobianos(res.items);
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega o
   // catálogo de antimicrobianos uma vez, na montagem do editor.
   useEffect(() => {
     carregar();

@@ -38,7 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- carrega a
   // sessão (se houver token salvo) uma única vez, na montagem do provider.
   useEffect(() => {
     carregarUsuario();
