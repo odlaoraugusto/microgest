@@ -24,6 +24,7 @@ def upgrade() -> None:
         "ADMIN", "BIOMEDICO", "TECNICO", "VISUALIZADOR", name="perfil_usuario_enum"
     )
     perfil_enum.create(op.get_bind(), checkfirst=True)
+    perfil_enum.create_type = False
 
     op.create_table(
         "usuarios",

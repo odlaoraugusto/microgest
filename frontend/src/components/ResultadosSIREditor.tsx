@@ -19,7 +19,7 @@ export default function ResultadosSIREditor({ value, onChange }: ResultadosSIREd
     setAntimicrobianos(res.items);
   }
 
-  // catálogo de antimicrobianos uma vez, na montagem do editor.
+  // Carrega o catálogo de antimicrobianos uma vez, na montagem do editor.
   useEffect(() => {
     carregar();
   }, []);

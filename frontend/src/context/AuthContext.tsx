@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // sessão (se houver token salvo) uma única vez, na montagem do provider.
+  // Carrega a sessão (se houver token salvo) uma única vez, na montagem do provider.
   useEffect(() => {
     carregarUsuario();
   }, []);

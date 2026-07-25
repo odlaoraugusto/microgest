@@ -14,7 +14,7 @@ export default function PacienteSelect({ value, onChange }: PacienteSelectProps)
   const [carregando, setCarregando] = useState(false);
   const termoDebounced = useDebounce(termo, 350);
 
-  // busca (com debounce) toda vez que o termo digitado muda.
+  // Dispara a busca (com debounce) toda vez que o termo digitado muda.
   useEffect(() => {
     setCarregando(true);
     listarPacientes(termoDebounced || undefined, 1, 20)

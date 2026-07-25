@@ -23,7 +23,7 @@ export default function MicrorganismoMultiSelect({
     setCarregando(false);
   }
 
-  // catálogo de microrganismos uma vez, na montagem do seletor.
+  // Carrega o catálogo de microrganismos uma vez, na montagem do seletor.
   useEffect(() => {
     carregar();
   }, []);

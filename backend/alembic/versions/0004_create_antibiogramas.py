@@ -24,6 +24,7 @@ def upgrade() -> None:
         "SENSIVEL", "INTERMEDIARIO", "RESISTENTE", name="resultado_sir_enum"
     )
     resultado_sir_enum.create(op.get_bind(), checkfirst=True)
+    resultado_sir_enum.create_type = False
 
     op.create_table(
         "antimicrobianos",

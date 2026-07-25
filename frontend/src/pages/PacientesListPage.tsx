@@ -33,7 +33,7 @@ export default function PacientesListPage() {
     }
   }
 
-  // busca toda vez que o termo (com debounce) muda.
+  // Refaz a busca toda vez que o termo (com debounce) muda.
   useEffect(() => {
     carregar();
     // eslint-disable-next-line react-hooks/exhaustive-deps

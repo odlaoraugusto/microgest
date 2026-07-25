@@ -41,7 +41,7 @@ export default function SolicitacaoFormPage() {
   const [materiaisCatalogo, setMateriaisCatalogo] = useState<string[]>([]);
   const [setoresCatalogo, setSetoresCatalogo] = useState<string[]>([]);
 
-  // sugestões dos catálogos de material/setor uma vez, na montagem do form.
+  // Carrega as sugestões dos catálogos de material/setor uma vez, na montagem do form.
   useEffect(() => {
     listarMateriais().then((res) => setMateriaisCatalogo(res.items.map((m) => m.nome)));
     listarSetores().then((res) => setSetoresCatalogo(res.items.map((s) => s.nome)));

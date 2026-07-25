@@ -34,7 +34,7 @@ export default function AntibiogramasPage() {
     }
   }
 
-  // lista de antibiogramas uma vez, na montagem da página.
+  // Carrega a lista de antibiogramas uma vez, na montagem da página.
   useEffect(() => {
     carregar();
   }, []);

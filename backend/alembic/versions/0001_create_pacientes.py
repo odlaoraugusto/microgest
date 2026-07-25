@@ -28,6 +28,8 @@ def upgrade() -> None:
     )
     sexo_enum.create(op.get_bind(), checkfirst=True)
     status_enum.create(op.get_bind(), checkfirst=True)
+    sexo_enum.create_type = False
+    status_enum.create_type = False
 
     op.create_table(
         "pacientes",

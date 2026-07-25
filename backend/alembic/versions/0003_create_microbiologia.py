@@ -34,6 +34,9 @@ def upgrade() -> None:
     gram_enum.create(op.get_bind(), checkfirst=True)
     tipo_micro_enum.create(op.get_bind(), checkfirst=True)
     resultado_enum.create(op.get_bind(), checkfirst=True)
+    gram_enum.create_type = False
+    tipo_micro_enum.create_type = False
+    resultado_enum.create_type = False
 
     op.create_table(
         "microrganismos",
