@@ -1,0 +1,289 @@
+# MicroGest - Documento Mestre de Planejamento (Versão Detalhada)
+
+Este documento consolida o planejamento funcional, técnico e estratégico do projeto MicroGest. Seu objetivo é servir como referência única durante o desenvolvimento do sistema.
+
+## 1. Objetivo do Projeto
+
+Desenvolver uma plataforma web para gestão da microbiologia hospitalar, contemplando desde o cadastro de pacientes até a geração de indicadores epidemiológicos e apoio à CCIH.
+
+## 2. Objetivos Específicos
+
+Eliminar controles em planilhas.
+
+Padronizar o fluxo da microbiologia.
+
+Permitir rastreabilidade completa das amostras.
+
+Gerar indicadores em tempo real.
+
+Facilitar auditorias e inspeções.
+
+Preparar integração futura com sistemas hospitalares (AGHUse/LIS/HIS).
+
+## 3. Arquitetura Tecnológica
+
+Frontend: React + TypeScript + Vite
+
+Backend: FastAPI
+
+Banco: PostgreSQL
+
+ORM: SQLAlchemy
+
+Migrações: Alembic
+
+Containerização: Docker
+
+Documentação automática: Swagger/OpenAPI
+
+## 4. Arquitetura de Software
+
+Fluxo:
+Frontend
+   ↓
+Router
+   ↓
+Service
+   ↓
+Repository
+   ↓
+PostgreSQL
+
+Responsabilidades:
+• Router: recebe requisições e retorna respostas.
+• Service: regras de negócio.
+• Repository: acesso ao banco.
+• Models: entidades.
+• Schemas: validação de entrada/saída.
+
+## 5. Estrutura do Projeto
+
+backend/
+
+frontend/
+
+docs/
+
+tests/
+
+knowledge/
+
+assets/
+
+design/
+
+infrastructure/
+
+scripts/
+
+## 6. Módulos Funcionais
+
+### Dashboard
+
+Indicadores gerais
+
+Alertas
+
+Resultados recentes
+
+Gráficos
+
+KPIs
+
+Atividades recentes
+
+### Pacientes
+
+Cadastro
+
+Edição
+
+Busca por prontuário
+
+Histórico microbiológico
+
+Internação
+
+Status
+
+### Solicitações
+
+Cadastro da solicitação
+
+Material
+
+Origem
+
+Prioridade
+
+Status
+
+Controle de coleta
+
+### Microbiologia
+
+Cadastro de culturas
+
+Resultado
+
+Microrganismos
+
+Materiais
+
+Liberação técnica
+
+Histórico
+
+### Antibiogramas
+
+Cadastro dos antimicrobianos
+
+S/I/R
+
+Perfis de resistência
+
+Mecanismos de resistência
+
+Regras CLSI/EUCAST futuras
+
+### CCIH
+
+Indicadores
+
+Distribuição por setor
+
+Perfil microbiológico
+
+Mapas de resistência
+
+Exportação
+
+### Relatórios
+
+PDF
+
+Excel
+
+Filtros
+
+Estatísticas
+
+Indicadores
+
+### Configurações
+
+Usuários
+
+Perfis
+
+Permissões
+
+Catálogos
+
+Parâmetros do sistema
+
+## 7. Base de Conhecimento (knowledge)
+
+Microrganismos
+
+Antimicrobianos
+
+Mecanismos de resistência
+
+Materiais biológicos
+
+Setores hospitalares
+
+Configurações clínicas
+
+## 8. Padrão da API
+
+Todas as respostas seguirão um contrato único.
+
+Sucesso:
+{
+  "success": true,
+  "message": "...",
+  "data": {}
+}
+
+Erro:
+{
+  "success": false,
+  "message": "...",
+  "errors": []
+}
+
+## 9. Segurança
+
+Autenticação futura por JWT
+
+Perfis de acesso
+
+Auditoria de alterações
+
+Logs de ações
+
+Soft delete quando aplicável
+
+## 10. Roadmap de Desenvolvimento
+
+Sprint 1: Infraestrutura
+
+Sprint 2: CRUD de Pacientes
+
+Sprint 3: Robustez da API
+
+Sprint 4: Frontend de Pacientes
+
+Sprint 5: Solicitações
+
+Sprint 6: Microbiologia
+
+Sprint 7: Antibiogramas
+
+Sprint 8: Dashboard
+
+Sprint 9: CCIH
+
+Sprint 10: Relatórios
+
+Sprint 11: Configurações
+
+Sprint 12: Autenticação
+
+Sprint 13: Auditoria
+
+Sprint 14: Preparação para Produção
+
+## 11. Melhorias Futuras
+
+Integração com AGHUse
+
+Integração com equipamentos laboratoriais
+
+Notificações automáticas
+
+Dashboards executivos
+
+Multi-hospital
+
+IA para apoio microbiológico
+
+Aplicativo móvel
+
+## 12. Princípios do Projeto
+
+Código limpo
+
+Arquitetura em camadas
+
+Versionamento Git
+
+Testes por sprint
+
+Documentação contínua
+
+Escalabilidade
+
+Este documento representa a base do planejamento. Durante o desenvolvimento ele deverá evoluir para um SRS completo contendo DER, regras de negócio detalhadas, casos de uso, protótipos de telas, especificações de APIs, requisitos funcionais e não funcionais e plano de implantação.

@@ -1,0 +1,29 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+gunicorn==23.0.0
+sqlalchemy==2.0.35
+alembic==1.13.2
+psycopg2-binary==2.9.9
+pydantic==2.9.2
+pydantic-settings==2.5.2
+email-validator==2.2.0
+python-dotenv==1.0.1
+
+# Autenticação (Sprint 12)
+python-jose[cryptography]==3.3.0
+# passlib 1.7.4 não fixa a versão do bcrypt, e o bcrypt 5.x quebra o
+# self-test interno do passlib (ValueError: password cannot be longer
+# than 72 bytes) - login/criação de usuário param de funcionar. Fixado
+# em 4.0.1, a última versão compatível.
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.9
+
+# Testes
+pytest==8.3.3
+httpx==0.27.2
+
+# Relatórios (Sprint 10)
+openpyxl==3.1.5
+reportlab==4.2.5
+Pillow==10.4.0

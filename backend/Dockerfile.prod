@@ -1,0 +1,35 @@
+## Dockerfile de PRODUÇÃO do backend.
+## Para desenvolvimento, use o Dockerfile padrão (com --reload) via docker-compose.yml.
+## Este arquivo é usado pelo docker-compose.prod.yml.
+
+FROM python:3.12-slim AS base
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc libpq-dev curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Usuário não-root - nunca rodar a aplicação como root em produção.
+RUN useradd --create-home --shell /bin/bash microgest \
+    && chown -R microgest:microgest /app
+USER microgest
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health || exit 1
+
+# 4 workers é um ponto de partida razoável para um laboratório pequeno/médio;
+# ajuste conforme os núcleos de CPU disponíveis no servidor (2 * núcleos + 1).
+CMD ["gunicorn", "app.main:app", \
+     "--workers", "4", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-"]

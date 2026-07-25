@@ -1,0 +1,68 @@
+## docker-compose de PRODUÇÃO.
+##
+## Diferenças em relação ao docker-compose.yml (desenvolvimento):
+## - Usa os Dockerfile.prod (gunicorn + Nginx, sem hot-reload)
+## - Não monta o código como volume (a imagem é imutável)
+## - Backend roda como usuário não-root
+## - Frontend é servido como arquivos estáticos via Nginx (porta 80)
+##
+## Uso:
+##   cp backend/.env.example backend/.env   # e AJUSTE os valores para produção!
+##   docker compose -f docker-compose.prod.yml up --build -d
+
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: microgest_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: microgest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: microgest
+    volumes:
+      - microgest_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U microgest"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # Em produção, o banco normalmente NÃO expõe a porta 5432 publicamente.
+    # Descomente apenas se precisar acessar de fora do host, e restrinja por firewall.
+    # ports:
+    #   - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: microgest_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg2://microgest:${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}@db:5432/microgest
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    command: sh -c "alembic upgrade head && gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    container_name: microgest_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  microgest_postgres_data:

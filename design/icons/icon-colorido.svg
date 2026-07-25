@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Anel externo (verde, aberto) -->
+  <circle cx="32" cy="32" r="29" fill="none" stroke="#2E8B57" stroke-width="3.2"
+    stroke-dasharray="164 26" stroke-linecap="round"
+    transform="rotate(-40 32 32)"/>
+
+  <!-- Círculo interno (azul primário) -->
+  <circle cx="32" cy="32" r="25" fill="#0F4C81"/>
+
+  <!-- Pontos (cocos/esporos) -->
+  <circle cx="22" cy="20" r="2.4" fill="#FFFFFF"/>
+  <circle cx="42" cy="18.5" r="1.5" fill="#FFFFFF"/>
+  <circle cx="44" cy="29" r="1.3" fill="#FFFFFF"/>
+  <circle cx="20" cy="40" r="1.6" fill="#FFFFFF"/>
+
+  <!-- Bacilo (bastonete) branco -->
+  <g stroke="#FFFFFF" stroke-width="1.7" fill="none" stroke-linecap="round" transform="rotate(-30 27 30)">
+    <rect x="17" y="25.5" width="20" height="9" rx="4.5"/>
+    <line x1="20.5" y1="25.5" x2="20.5" y2="20.5"/>
+    <line x1="25.5" y1="25.5" x2="25.5" y2="20"/>
+    <line x1="30.5" y1="25.5" x2="30.5" y2="20.5"/>
+  </g>
+
+  <!-- Coco em formato de "feijão" (verde) -->
+  <path d="M35 39c-2.6-1.4-3-4.6-0.6-6.4 2.4-1.8 6.4-1 6.9 2 0.5 3-3.7 5.8-6.3 4.4z"
+        fill="none" stroke="#2E8B57" stroke-width="1.7"/>
+</svg>
