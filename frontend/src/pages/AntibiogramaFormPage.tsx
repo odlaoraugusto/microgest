@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import IsoladoSelect from "../components/IsoladoSelect";
 import ResultadosSIREditor from "../components/ResultadosSIREditor";
@@ -21,8 +21,16 @@ export default function AntibiogramaFormPage() {
   const { id } = useParams();
   const editando = Boolean(id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isoladoId = searchParams.get("isolado_id");
+  const voltarPara = searchParams.get("voltar_para");
+  // Veio de um exame (fluxo unificado): o isolado já está determinado pela
+  // query string, não precisa (nem deve) ser escolhido de novo no formulário.
+  const isoladoPreSelecionado = Boolean(!editando && isoladoId);
 
-  const [form, setForm] = useState<AntibiogramaFormData>(FORM_INICIAL);
+  const [form, setForm] = useState<AntibiogramaFormData>(
+    isoladoPreSelecionado ? { ...FORM_INICIAL, cultura_microrganismo_id: isoladoId! } : FORM_INICIAL
+  );
   const [carregando, setCarregando] = useState(editando);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -44,6 +52,14 @@ export default function AntibiogramaFormPage() {
       .finally(() => setCarregando(false));
   }, [id]);
 
+  function irParaDestinoFinal() {
+    if (voltarPara) {
+      navigate(`/exames/${voltarPara}/editar`);
+    } else {
+      navigate("/antibiogramas");
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSalvando(true);
@@ -56,7 +72,7 @@ export default function AntibiogramaFormPage() {
       } else {
         await criarAntibiograma(payload);
       }
-      navigate("/antibiogramas");
+      irParaDestinoFinal();
     } catch (err: unknown) {
       setErro(extrairMensagemErro(err, "Não foi possível salvar o antibiograma."));
     } finally {
@@ -84,6 +100,10 @@ export default function AntibiogramaFormPage() {
               <label>Microrganismo isolado (cultura positiva) *</label>
               {editando ? (
                 <input value={form.cultura_microrganismo_id} disabled />
+              ) : isoladoPreSelecionado ? (
+                <p style={{ margin: 0, fontSize: 14, color: "var(--mg-cinza-600)" }}>
+                  Isolado pré-selecionado a partir do exame de origem.
+                </p>
               ) : (
                 <IsoladoSelect
                   value={form.cultura_microrganismo_id}
@@ -120,7 +140,7 @@ export default function AntibiogramaFormPage() {
               <button
                 type="button"
                 className="mg-btn mg-btn-outline"
-                onClick={() => navigate("/antibiogramas")}
+                onClick={irParaDestinoFinal}
               >
                 Cancelar
               </button>

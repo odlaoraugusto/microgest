@@ -8,8 +8,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", path: "/", icon: "📊", implementado: true },
   { label: "Pacientes", path: "/pacientes", icon: "🧑‍⚕️", implementado: true },
-  { label: "Solicitações", path: "/solicitacoes", icon: "📋", implementado: true },
-  { label: "Microbiologia", path: "/microbiologia", icon: "🧫", implementado: true },
+  { label: "Exames", path: "/exames", icon: "🧫", implementado: true },
   { label: "Antibiogramas", path: "/antibiogramas", icon: "💊", implementado: true },
   { label: "CCIH", path: "/ccih", icon: "🛡️", implementado: true },
   { label: "Relatórios", path: "/relatorios", icon: "📄", implementado: true },

@@ -18,6 +18,7 @@ from app.routers import (
     ccih_router,
     configuracao_router,
     dashboard_router,
+    exame_router,
     health_router,
     log_auditoria_router,
     material_router,
@@ -80,6 +81,7 @@ app.include_router(paciente_router.router)
 app.include_router(solicitacao_router.router)
 app.include_router(microrganismo_router.router)
 app.include_router(microbiologia_router.router)
+app.include_router(exame_router.router)
 app.include_router(antimicrobiano_router.router)
 app.include_router(antibiograma_router.router)
 app.include_router(setor_router.router)

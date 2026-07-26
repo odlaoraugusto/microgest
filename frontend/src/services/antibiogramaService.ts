@@ -2,11 +2,16 @@ import { api, ApiResponse } from "./api";
 import { Antibiograma, AntibiogramaFormData, AntibiogramaListagem } from "../types/antibiograma";
 
 export async function listarAntibiogramas(
+  culturaMicrorganismoId?: string,
   page = 1,
   pageSize = 20
 ): Promise<AntibiogramaListagem> {
   const response = await api.get<ApiResponse<AntibiogramaListagem>>("/api/antibiogramas", {
-    params: { page, page_size: pageSize },
+    params: {
+      cultura_microrganismo_id: culturaMicrorganismoId,
+      page,
+      page_size: pageSize,
+    },
   });
   return response.data.data;
 }
