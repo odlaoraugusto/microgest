@@ -25,10 +25,11 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# 4 workers é um ponto de partida razoável para um laboratório pequeno/médio;
-# ajuste conforme os núcleos de CPU disponíveis no servidor (2 * núcleos + 1).
+# 2 workers é um ponto de partida seguro para instâncias pequenas (ex.: 1
+# vCPU / 512MB, como no free tier de PaaS); ajuste conforme os núcleos de
+# CPU e memória disponíveis no servidor (regra geral: 2 * núcleos + 1).
 CMD ["gunicorn", "app.main:app", \
-     "--workers", "4", \
+     "--workers", "2", \
      "--worker-class", "uvicorn.workers.UvicornWorker", \
      "--bind", "0.0.0.0:8000", \
      "--access-logfile", "-", \
