@@ -4,7 +4,7 @@ const CONFIG: Record<ResultadoCultura, { label: string; className: string }> = {
   EM_ANALISE: { label: "Em análise", className: "mg-badge-info" },
   POSITIVA: { label: "Positiva", className: "mg-badge-erro" },
   NEGATIVA: { label: "Negativa", className: "mg-badge-sucesso" },
-  CONTAMINADA: { label: "Contaminada", className: "mg-badge-alerta" },
+  CONTAMINADA: { label: "Contaminada", className: "mg-badge-erro" },
 };
 
 export default function ResultadoCulturaBadge({

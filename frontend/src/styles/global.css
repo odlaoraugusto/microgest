@@ -192,3 +192,63 @@ table.mg-table td {
   outline: none;
   border-color: var(--mg-primaria);
 }
+
+/* Tela de login (split-screen) - Manual de Identidade Visual v1.0, seção 8.1 */
+.mg-login-container {
+  min-height: 100vh;
+  display: flex;
+}
+
+.mg-login-painel-marca {
+  flex: 1 1 50%;
+  background: var(--mg-primaria);
+  color: var(--mg-branco);
+  padding: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.mg-login-painel-marca::after {
+  content: "";
+  position: absolute;
+  right: -120px;
+  bottom: -120px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.mg-login-painel-marca > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mg-login-painel-form {
+  flex: 1 1 50%;
+  background: var(--mg-fundo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+@media (max-width: 900px) {
+  .mg-login-container {
+    flex-direction: column;
+  }
+
+  .mg-login-painel-marca {
+    flex: none;
+    padding: 32px 24px;
+  }
+
+  .mg-login-painel-form {
+    flex: none;
+    padding: 32px 20px 48px 20px;
+  }
+}

@@ -10,8 +10,8 @@ interface MicroGestIconProps {
 }
 
 /**
- * Símbolo oficial do MicroGest, vetorizado a partir do manual de
- * identidade visual (ver design/icons/). Usar sempre este componente em
+ * Símbolo oficial do MicroGest, vetorizado a partir do Manual de
+ * Identidade Visual v1.0 (ver design/svg/). Usar sempre este componente em
  * vez de recriar o ícone ou usar emojis.
  */
 export default function MicroGestIcon({

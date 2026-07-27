@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [entrando, setEntrando] = useState(false);
+  const [manterConectado, setManterConectado] = useState(false);
+  const [mostrarAjudaSenha, setMostrarAjudaSenha] = useState(false);
 
   if (!carregando && autenticado) {
     const destino = (location.state as { from?: string })?.from ?? "/";
@@ -34,68 +36,124 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "var(--mg-fundo)",
-        fontFamily: "var(--mg-font-family)",
-        padding: 20,
-      }}
-    >
-      <div className="mg-card" style={{ width: "100%", maxWidth: 380 }}>
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <div style={{ margin: "0 auto 12px auto", width: 48, height: 48 }}>
-            <MicroGestIcon size={48} />
-          </div>
-          <h2 style={{ margin: 0 }}>MicroGest</h2>
-          <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "var(--mg-cinza-600)" }}>
-            Sistema Inteligente de Gestão Microbiológica
-          </p>
+    <div className="mg-login-container" style={{ fontFamily: "var(--mg-font-family)" }}>
+      {/* Painel esquerdo - identidade da marca */}
+      <div className="mg-login-painel-marca">
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}>
+          <MicroGestIcon size={40} variante="negativo" />
+          <span style={{ fontWeight: 700, fontSize: 20, lineHeight: 1 }}>
+            <span style={{ color: "#fff" }}>Micro</span>
+            <span style={{ color: "var(--mg-secundaria)" }}>Gest</span>
+          </span>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {erro && (
-            <p style={{ color: "var(--mg-erro)", fontSize: 14, marginTop: 0 }}>{erro}</p>
-          )}
+        <h1 style={{ fontSize: 34, fontWeight: 700, lineHeight: 1.25, margin: "0 0 16px 0" }}>
+          Transformando dados microbiológicos em decisões.
+        </h1>
 
-          <div className="mg-field" style={{ marginBottom: 14 }}>
-            <label>E-mail</label>
-            <input
-              type="email"
-              required
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div className="mg-field" style={{ marginBottom: 20 }}>
-            <label>Senha</label>
-            <input
-              type="password"
-              required
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-            />
-          </div>
-
-          <button
-            className="mg-btn mg-btn-primary"
-            type="submit"
-            disabled={entrando}
-            style={{ width: "100%", justifyContent: "center" }}
-          >
-            {entrando ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
-
-        <p style={{ fontSize: 12, color: "var(--mg-cinza-400)", textAlign: "center", marginTop: 18 }}>
-          Primeiro acesso? Cadastre-se pela API (POST /api/usuarios) - o primeiro usuário
-          criado se torna administrador automaticamente.
+        <p style={{ fontSize: 15, color: "#e2e8f0", lineHeight: 1.6, margin: 0, maxWidth: 440 }}>
+          Plataforma inteligente para gestão da microbiologia hospitalar: da coleta da amostra
+          aos indicadores da CCIH, em um só lugar.
         </p>
+      </div>
+
+      {/* Painel direito - formulário */}
+      <div className="mg-login-painel-form">
+        <div style={{ width: "100%", maxWidth: 400 }}>
+          <span className="mg-badge mg-badge-sucesso" style={{ marginBottom: 20, display: "inline-block" }}>
+            • Ambiente seguro
+          </span>
+
+          <h2 style={{ fontSize: 26, margin: "0 0 8px 0" }}>Bem-vindo de volta</h2>
+          <p style={{ margin: "0 0 24px 0", fontSize: 14, color: "var(--mg-cinza-600)" }}>
+            Acesse sua conta para continuar a gestão microbiológica.
+          </p>
+
+          <form onSubmit={handleSubmit}>
+            {erro && (
+              <p style={{ color: "var(--mg-erro)", fontSize: 14, marginTop: 0 }}>{erro}</p>
+            )}
+
+            <div className="mg-field" style={{ marginBottom: 14 }}>
+              <label>Usuário ou e-mail</label>
+              <input
+                type="email"
+                required
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="usuario@hospital.com.br"
+              />
+            </div>
+
+            <div className="mg-field" style={{ marginBottom: 12 }}>
+              <label>Senha</label>
+              <input
+                type="password"
+                required
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+              />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 20,
+                fontSize: 13,
+              }}
+            >
+              <label style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--mg-cinza-600)" }}>
+                <input
+                  type="checkbox"
+                  checked={manterConectado}
+                  onChange={(e) => setManterConectado(e.target.checked)}
+                />
+                Manter conectado
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setMostrarAjudaSenha((atual) => !atual)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  color: "var(--mg-primaria)",
+                  fontWeight: 500,
+                  fontSize: 13,
+                }}
+              >
+                Esqueci minha senha
+              </button>
+            </div>
+
+            {mostrarAjudaSenha && (
+              <p style={{ fontSize: 12, color: "var(--mg-cinza-600)", marginTop: -12, marginBottom: 16 }}>
+                Entre em contato com o administrador do sistema para redefinir sua senha.
+              </p>
+            )}
+
+            <button
+              className="mg-btn mg-btn-primary"
+              type="submit"
+              disabled={entrando}
+              style={{ width: "100%", justifyContent: "center" }}
+            >
+              {entrando ? "Entrando..." : "Entrar"}
+            </button>
+          </form>
+
+          <p style={{ fontSize: 12, color: "var(--mg-cinza-400)", textAlign: "center", marginTop: 24 }}>
+            Primeiro acesso? Cadastre-se pela API (POST /api/usuarios) - o primeiro usuário
+            criado se torna administrador automaticamente.
+          </p>
+          <p style={{ fontSize: 11, color: "var(--mg-cinza-400)", textAlign: "center", marginTop: 6 }}>
+            MicroGest &copy; {new Date().getFullYear()} · v1.2 · Ambiente hospitalar
+          </p>
+        </div>
       </div>
     </div>
   );

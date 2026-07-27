@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     # Aplicação
     APP_NAME: str = "MicroGest"
-    APP_VERSION: str = "0.1.0"
+    APP_VERSION: str = "1.2.0"
     ENVIRONMENT: str = "development"  # development | staging | production
     DEBUG: bool = True
 

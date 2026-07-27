@@ -1,3 +1,4 @@
+import { Bell, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 interface TopbarProps {
@@ -32,6 +33,62 @@ export default function Topbar({ titulo, subtitulo }: TopbarProps) {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ position: "relative" }}>
+          <Search
+            size={16}
+            strokeWidth={2}
+            style={{
+              position: "absolute",
+              left: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--mg-cinza-400)",
+              pointerEvents: "none",
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Buscar paciente, cultura..."
+            style={{
+              padding: "8px 14px 8px 36px",
+              borderRadius: "var(--mg-radius-sm)",
+              border: "1px solid var(--mg-cinza-200)",
+              background: "var(--mg-cinza-100)",
+              fontSize: 13,
+              width: 220,
+            }}
+          />
+        </div>
+
+        <button
+          type="button"
+          title="Notificações"
+          style={{
+            position: "relative",
+            border: "1px solid var(--mg-cinza-200)",
+            background: "var(--mg-branco)",
+            borderRadius: "var(--mg-radius-sm)",
+            width: 34,
+            height: 34,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Bell size={18} strokeWidth={2} color="var(--mg-cinza-600)" />
+          <span
+            style={{
+              position: "absolute",
+              top: 6,
+              right: 7,
+              width: 7,
+              height: 7,
+              borderRadius: "50%",
+              background: "var(--mg-alerta)",
+            }}
+          />
+        </button>
+
         {usuario && (
           <span style={{ fontSize: 13, color: "var(--mg-cinza-600)" }}>{usuario.perfil}</span>
         )}
@@ -40,7 +97,7 @@ export default function Topbar({ titulo, subtitulo }: TopbarProps) {
             width: 36,
             height: 36,
             borderRadius: "50%",
-            background: "var(--mg-primaria)",
+            background: "var(--mg-secundaria)",
             color: "#fff",
             display: "flex",
             alignItems: "center",

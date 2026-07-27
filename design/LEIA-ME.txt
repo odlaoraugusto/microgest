@@ -1,0 +1,61 @@
+MicroGest — Pacote de Identidade Visual (v1.0)
+================================================
+
+Este pacote contém todos os arquivos de marca do MicroGest, organizados por tipo.
+Para o guia completo de uso (cores, tipografia, regras de aplicação), consulte:
+
+  documento/MicroGest_Manual_de_Identidade_Visual.docx
+
+Estrutura das pastas
+---------------------
+/documento
+    Manual de Identidade Visual completo (.docx), com todas as diretrizes de marca.
+
+/svg
+    Vetores editáveis (escaláveis para qualquer tamanho sem perda de qualidade).
+    - microgest-simbolo-colorido.svg              -> símbolo isolado, versão padrão
+    - microgest-simbolo-negativo.svg               -> símbolo em tile navy, ícone branco (fundos escuros)
+    - microgest-simbolo-monocromatico.svg          -> símbolo em tom único escuro
+    - microgest-simbolo-monocromatico-negativo.svg -> símbolo em tom único claro/branco
+    - microgest-logo-horizontal.svg                -> logotipo completo (uso principal)
+    - microgest-logo-vertical.svg                  -> logotipo completo, versão vertical
+    - microgest-logo-horizontal-negativo.svg       -> logotipo para fundos escuros
+
+/png/logos
+    Logotipos e símbolo em alta resolução (PNG), prontos para documentos e apresentações.
+
+/png/app-icones
+    Ícones de aplicativo em todos os tamanhos de plataforma (símbolo colorido sobre fundo
+    transparente/branco, igual ao padrão já usado nos arquivos originais do projeto):
+    - android192.png            192x192   Android / PWA manifest
+    - ios180.png                 180x180   apple-touch-icon
+    - apple-touch-icon-152/167   152/167   iPad e variantes Apple
+    - windows256.png             256x256   atalho Windows
+    - favicon32.png / 16.png     32/16     favicon web
+    - icone512.png / 1024.png    512/1024  alta resolução / lojas de app
+    - maskable-512.png           512x512   ícone adaptável Android (fundo navy + ícone branco)
+
+/favicon
+    favicon.ico multi-resolução (16 a 256px), pronto para publicar na raiz do site.
+
+/mockups
+    Referências visuais para o time de desenvolvimento frontend:
+    - login-screen.png          Tela de login
+    - dashboard-structure.png   Estrutura de menu lateral, cabeçalho e dashboard
+
+Paleta rápida
+-------------
+Primária:   #0F4C81
+Secundária: #2E8B57
+Texto:      #1F2937
+Fundo:      #F8FAFC
+Sucesso:    #22C55E   Alerta: #F59E0B   Erro: #DC2626   Info: #3B82F6
+
+Tipografia: Poppins (Google Fonts) — pesos Light/Regular/Medium/SemiBold/Bold
+
+Nota de versão: o símbolo foi re-extraído por vetorização (traçado) direto do ícone
+oficial em alta resolução, garantindo fidelidade total ao desenho original aprovado.
+
+Dúvidas ou novas aplicações da marca: consulte sempre o Manual de Identidade
+Visual antes de criar uma nova peça — ele traz a área de proteção mínima e os
+usos incorretos a evitar (seções 3 e 4).

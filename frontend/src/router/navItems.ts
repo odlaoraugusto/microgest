@@ -1,16 +1,27 @@
+import {
+  LayoutDashboard,
+  Users,
+  FlaskConical,
+  Pill,
+  ShieldCheck,
+  FileText,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
+
 export interface NavItem {
   label: string;
   path: string;
-  icon: string; // emoji simples no lugar de um ícone SVG, facilmente trocável depois
+  icon: LucideIcon; // ícone Lucide (stroke 2px, outline) - Manual de Identidade Visual v1.0, seção 9
   implementado: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", path: "/", icon: "📊", implementado: true },
-  { label: "Pacientes", path: "/pacientes", icon: "🧑‍⚕️", implementado: true },
-  { label: "Exames", path: "/exames", icon: "🧫", implementado: true },
-  { label: "Antibiogramas", path: "/antibiogramas", icon: "💊", implementado: true },
-  { label: "CCIH", path: "/ccih", icon: "🛡️", implementado: true },
-  { label: "Relatórios", path: "/relatorios", icon: "📄", implementado: true },
-  { label: "Configurações", path: "/configuracoes", icon: "⚙️", implementado: true },
+  { label: "Dashboard", path: "/", icon: LayoutDashboard, implementado: true },
+  { label: "Pacientes", path: "/pacientes", icon: Users, implementado: true },
+  { label: "Exames", path: "/exames", icon: FlaskConical, implementado: true },
+  { label: "Antibiogramas", path: "/antibiogramas", icon: Pill, implementado: true },
+  { label: "CCIH", path: "/ccih", icon: ShieldCheck, implementado: true },
+  { label: "Relatórios", path: "/relatorios", icon: FileText, implementado: true },
+  { label: "Configurações", path: "/configuracoes", icon: Settings, implementado: true },
 ];

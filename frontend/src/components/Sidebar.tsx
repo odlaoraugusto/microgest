@@ -18,7 +18,10 @@ export default function Sidebar() {
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 8px 24px 8px" }}>
         <MicroGestIcon size={34} variante="negativo" />
         <div>
-          <div style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.1 }}>MicroGest</div>
+          <div style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.1 }}>
+            <span style={{ color: "#fff" }}>Micro</span>
+            <span style={{ color: "var(--mg-secundaria)" }}>Gest</span>
+          </div>
           <div style={{ fontSize: 10, color: "var(--mg-cinza-400)" }}>
             Gestão Microbiológica
           </div>
@@ -26,7 +29,9 @@ export default function Sidebar() {
       </div>
 
       <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {NAV_ITEMS.map((item) => (
+        {NAV_ITEMS.map((item) => {
+          const Icone = item.icon;
+          return (
           <NavLink
             key={item.path}
             to={item.path}
@@ -39,11 +44,11 @@ export default function Sidebar() {
               borderRadius: "var(--mg-radius-sm)",
               fontSize: 14,
               color: isActive ? "#fff" : "#cbd5e1",
-              background: isActive ? "var(--mg-primaria)" : "transparent",
+              background: isActive ? "rgba(255,255,255,0.14)" : "transparent",
               fontWeight: isActive ? 600 : 400,
             })}
           >
-            <span>{item.icon}</span>
+            <Icone size={20} strokeWidth={2} />
             <span style={{ flex: 1 }}>{item.label}</span>
             {!item.implementado && (
               <span
@@ -59,7 +64,8 @@ export default function Sidebar() {
               </span>
             )}
           </NavLink>
-        ))}
+          );
+        })}
       </nav>
     </aside>
   );
