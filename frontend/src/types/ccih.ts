@@ -21,6 +21,7 @@ export interface TaxaResistencia {
 export interface IndicadoresCCIH {
   periodo_inicio: string;
   periodo_fim: string;
+  filtro_setor: string | null;
   total_solicitacoes: number;
   total_culturas_positivas: number;
   taxa_positividade: number;

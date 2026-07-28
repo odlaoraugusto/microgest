@@ -159,8 +159,10 @@ class RelatorioService:
         wb.save(buffer)
         return buffer.getvalue()
 
-    def gerar_pdf_ccih(self, data_inicio: date | None, data_fim: date | None) -> bytes:
-        indicadores = self.ccih_service.indicadores(data_inicio, data_fim)
+    def gerar_pdf_ccih(
+        self, data_inicio: date | None, data_fim: date | None, origem: str | None = None
+    ) -> bytes:
+        indicadores = self.ccih_service.indicadores(data_inicio, data_fim, origem=origem)
         styles = getSampleStyleSheet()
 
         buffer = io.BytesIO()
@@ -178,6 +180,10 @@ class RelatorioService:
             Paragraph(
                 f"Período: {indicadores.periodo_inicio.strftime('%d/%m/%Y')} a "
                 f"{indicadores.periodo_fim.strftime('%d/%m/%Y')}",
+                styles["Normal"],
+            ),
+            Paragraph(
+                f"Setor: {indicadores.filtro_setor or 'Todos os setores'}",
                 styles["Normal"],
             ),
             Paragraph(

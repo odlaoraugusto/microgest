@@ -3,10 +3,11 @@ import { IndicadoresCCIH } from "../types/ccih";
 
 export async function obterIndicadoresCCIH(
   dataInicio?: string,
-  dataFim?: string
+  dataFim?: string,
+  origem?: string
 ): Promise<IndicadoresCCIH> {
   const response = await api.get<ApiResponse<IndicadoresCCIH>>("/api/ccih/indicadores", {
-    params: { data_inicio: dataInicio, data_fim: dataFim },
+    params: { data_inicio: dataInicio, data_fim: dataFim, origem: origem || undefined },
   });
   return response.data.data;
 }

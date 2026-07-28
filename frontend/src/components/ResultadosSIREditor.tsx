@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { criarAntimicrobiano, listarAntimicrobianos } from "../services/antimicrobianoService";
 import { Antimicrobiano } from "../types/antimicrobiano";
-import { ResultadoAntimicrobiano, ResultadoSIR } from "../types/antibiograma";
+import { RESULTADO_SIR_LABELS, ResultadoAntimicrobiano, ResultadoSIR } from "../types/antibiograma";
 
 interface ResultadosSIREditorProps {
   value: ResultadoAntimicrobiano[];
@@ -82,7 +82,7 @@ export default function ResultadosSIREditor({ value, onChange }: ResultadosSIREd
           >
             {SIR_OPCOES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {RESULTADO_SIR_LABELS[s]}
               </option>
             ))}
           </select>

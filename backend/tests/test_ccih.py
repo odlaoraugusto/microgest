@@ -92,6 +92,26 @@ def test_distribuicao_por_setor(authenticated_client):
     assert setores.get("Enfermaria") == 1
 
 
+def test_filtro_por_setor(authenticated_client):
+    _fluxo_positivo_com_antibiograma(
+        authenticated_client, "c10", origem="UTI", resultado_sir="RESISTENTE"
+    )
+    _fluxo_positivo_com_antibiograma(
+        authenticated_client, "c11", origem="Enfermaria", resultado_sir="SENSIVEL"
+    )
+
+    body = authenticated_client.get(
+        "/api/ccih/indicadores", params={"origem": "UTI"}
+    ).json()["data"]
+
+    assert body["filtro_setor"] == "UTI"
+    assert body["total_solicitacoes"] == 1
+    assert body["total_culturas_positivas"] == 1
+    assert [item["setor"] for item in body["distribuicao_por_setor"]] == ["UTI"]
+    assert len(body["taxa_resistencia"]) == 1
+    assert body["taxa_resistencia"][0]["antimicrobiano"] == "Antimicrobiano c10"
+
+
 def test_perfil_microbiologico_calcula_percentual(authenticated_client):
     _fluxo_positivo_com_antibiograma(authenticated_client, "c5", nome_micro="Klebsiella pneumoniae")
     _fluxo_positivo_com_antibiograma(authenticated_client, "c6", nome_micro="Klebsiella pneumoniae")

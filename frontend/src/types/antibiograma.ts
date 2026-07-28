@@ -3,6 +3,16 @@ import { Microrganismo } from "./microrganismo";
 
 export type ResultadoSIR = "SENSIVEL" | "INTERMEDIARIO" | "RESISTENTE";
 
+// Rótulo exibido para cada resultado S/I/R. O valor "INTERMEDIARIO" continua
+// sendo o código interno (banco/API), mas a terminologia clínica atual (CLSI)
+// chama essa categoria de "Sensível, aumentando exposição" em vez de
+// "Intermediário" - só o texto mostrado ao usuário muda.
+export const RESULTADO_SIR_LABELS: Record<ResultadoSIR, string> = {
+  SENSIVEL: "Sensível (S)",
+  INTERMEDIARIO: "Sensível, aumentando exposição (I)",
+  RESISTENTE: "Resistente (R)",
+};
+
 export interface ResultadoAntimicrobiano {
   antimicrobiano_id: string;
   resultado: ResultadoSIR;

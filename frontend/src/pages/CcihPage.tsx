@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import { obterIndicadoresCCIH } from "../services/ccihService";
+import { listarSetores } from "../services/setorService";
 import { IndicadoresCCIH } from "../types/ccih";
 
 function hojeISO() {
@@ -38,6 +39,8 @@ function BarraPercentual({ percentual, cor }: { percentual: number; cor: string 
 export default function CcihPage() {
   const [dataInicio, setDataInicio] = useState(primeiroDiaDoMesISO());
   const [dataFim, setDataFim] = useState(hojeISO());
+  const [setor, setSetor] = useState("");
+  const [setoresCatalogo, setSetoresCatalogo] = useState<string[]>([]);
   const [indicadores, setIndicadores] = useState<IndicadoresCCIH | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export default function CcihPage() {
     setCarregando(true);
     setErro(null);
     try {
-      const resultado = await obterIndicadoresCCIH(dataInicio, dataFim);
+      const resultado = await obterIndicadoresCCIH(dataInicio, dataFim, setor || undefined);
       setIndicadores(resultado);
     } catch {
       setErro(
@@ -61,6 +64,7 @@ export default function CcihPage() {
   // Carrega os indicadores do período padrão (mês corrente) uma vez, na montagem.
   useEffect(() => {
     carregar();
+    listarSetores().then((res) => setSetoresCatalogo(res.items.map((s) => s.nome)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -75,6 +79,17 @@ export default function CcihPage() {
           <div className="mg-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <label style={{ margin: 0 }}>até</label>
             <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+          </div>
+          <div className="mg-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <label style={{ margin: 0 }}>Setor</label>
+            <select value={setor} onChange={(e) => setSetor(e.target.value)}>
+              <option value="">Todos os setores</option>
+              {setoresCatalogo.map((nome) => (
+                <option key={nome} value={nome}>
+                  {nome}
+                </option>
+              ))}
+            </select>
           </div>
           <button className="mg-btn mg-btn-primary" onClick={carregar}>
             Aplicar

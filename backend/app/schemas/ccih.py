@@ -30,6 +30,7 @@ class TaxaResistenciaOut(BaseModel):
 class IndicadoresCCIHOut(BaseModel):
     periodo_inicio: date
     periodo_fim: date
+    filtro_setor: str | None = None
     total_solicitacoes: int
     total_culturas_positivas: int
     taxa_positividade: float

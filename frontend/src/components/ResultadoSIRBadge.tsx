@@ -1,12 +1,13 @@
-import { ResultadoSIR } from "../types/antibiograma";
+import { RESULTADO_SIR_LABELS, ResultadoSIR } from "../types/antibiograma";
 
-const CONFIG: Record<ResultadoSIR, { label: string; className: string }> = {
-  SENSIVEL: { label: "Sensível (S)", className: "mg-badge-sucesso" },
-  INTERMEDIARIO: { label: "Intermediário (I)", className: "mg-badge-alerta" },
-  RESISTENTE: { label: "Resistente (R)", className: "mg-badge-erro" },
+const CLASSNAME: Record<ResultadoSIR, string> = {
+  SENSIVEL: "mg-badge-sucesso",
+  INTERMEDIARIO: "mg-badge-alerta",
+  RESISTENTE: "mg-badge-erro",
 };
 
 export default function ResultadoSIRBadge({ resultado }: { resultado: ResultadoSIR }) {
-  const { label, className } = CONFIG[resultado];
-  return <span className={`mg-badge ${className}`}>{label}</span>;
+  return (
+    <span className={`mg-badge ${CLASSNAME[resultado]}`}>{RESULTADO_SIR_LABELS[resultado]}</span>
+  );
 }

@@ -32,18 +32,24 @@ class CCIHRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def total_solicitacoes(self, inicio: date, fim: date) -> int:
+    def total_solicitacoes(self, inicio: date, fim: date, origem: str | None = None) -> int:
         stmt = select(func.count(Solicitacao.id)).where(
             Solicitacao.is_active.is_(True),
             Solicitacao.data_solicitacao >= inicio,
             Solicitacao.data_solicitacao <= fim,
         )
+        if origem:
+            stmt = stmt.where(Solicitacao.origem == origem)
         return self.db.scalar(stmt) or 0
 
     def total_culturas_por_resultado(
-        self, inicio: date, fim: date, resultado: ResultadoCulturaEnum | None = None
+        self,
+        inicio: date,
+        fim: date,
+        resultado: ResultadoCulturaEnum | None = None,
+        origem: str | None = None,
     ) -> int:
-        stmt = select(func.count(Cultura.id)).where(
+        stmt = select(func.count(Cultura.id)).select_from(Cultura).where(
             Cultura.is_active.is_(True),
             Cultura.created_at >= _inicio_periodo(inicio),
             Cultura.created_at <= _fim_periodo(fim),
@@ -52,9 +58,15 @@ class CCIHRepository:
             stmt = stmt.where(Cultura.resultado == resultado)
         else:
             stmt = stmt.where(Cultura.resultado != ResultadoCulturaEnum.EM_ANALISE)
+        if origem:
+            stmt = stmt.join(Solicitacao, Solicitacao.id == Cultura.solicitacao_id).where(
+                Solicitacao.origem == origem
+            )
         return self.db.scalar(stmt) or 0
 
-    def distribuicao_por_setor(self, inicio: date, fim: date) -> list[tuple[str, int]]:
+    def distribuicao_por_setor(
+        self, inicio: date, fim: date, origem: str | None = None
+    ) -> list[tuple[str, int]]:
         origem_normalizada = func.coalesce(Solicitacao.origem, SETOR_NAO_INFORMADO)
         stmt = (
             select(origem_normalizada, func.count(Cultura.id))
@@ -69,9 +81,13 @@ class CCIHRepository:
             .group_by(origem_normalizada)
             .order_by(func.count(Cultura.id).desc())
         )
+        if origem:
+            stmt = stmt.where(Solicitacao.origem == origem)
         return list(self.db.execute(stmt).all())
 
-    def perfil_microbiologico(self, inicio: date, fim: date) -> list[tuple[str, int]]:
+    def perfil_microbiologico(
+        self, inicio: date, fim: date, origem: str | None = None
+    ) -> list[tuple[str, int]]:
         stmt = (
             select(Microrganismo.nome, func.count(CulturaMicrorganismo.id))
             .select_from(CulturaMicrorganismo)
@@ -86,9 +102,15 @@ class CCIHRepository:
             .group_by(Microrganismo.nome)
             .order_by(func.count(CulturaMicrorganismo.id).desc())
         )
+        if origem:
+            stmt = stmt.join(Solicitacao, Solicitacao.id == Cultura.solicitacao_id).where(
+                Solicitacao.origem == origem
+            )
         return list(self.db.execute(stmt).all())
 
-    def taxa_resistencia(self, inicio: date, fim: date) -> list[tuple[str, int, int, int]]:
+    def taxa_resistencia(
+        self, inicio: date, fim: date, origem: str | None = None
+    ) -> list[tuple[str, int, int, int]]:
         total_testado = func.count(AntibiogramaResultado.id)
         total_resistente = func.sum(
             case((AntibiogramaResultado.resultado == ResultadoSIREnum.RESISTENTE, 1), else_=0)
@@ -109,6 +131,16 @@ class CCIHRepository:
             .group_by(Antimicrobiano.nome)
             .order_by(total_testado.desc())
         )
+        if origem:
+            stmt = (
+                stmt.join(
+                    CulturaMicrorganismo,
+                    CulturaMicrorganismo.id == Antibiograma.cultura_microrganismo_id,
+                )
+                .join(Cultura, Cultura.id == CulturaMicrorganismo.cultura_id)
+                .join(Solicitacao, Solicitacao.id == Cultura.solicitacao_id)
+                .where(Solicitacao.origem == origem)
+            )
         resultado = self.db.execute(stmt).all()
         return [
             (nome, testado, resistente or 0, sensivel or 0)

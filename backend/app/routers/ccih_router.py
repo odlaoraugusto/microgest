@@ -18,10 +18,11 @@ router = APIRouter(prefix="/api/ccih", tags=["CCIH"], dependencies=[Depends(get_
 def obter_indicadores_ccih(
     data_inicio: date | None = Query(default=None),
     data_fim: date | None = Query(default=None),
+    origem: str | None = Query(default=None, description="Filtra por setor/origem da solicitação"),
     db: Session = Depends(get_db),
 ):
     service = CCIHService(db)
-    indicadores = service.indicadores(data_inicio, data_fim)
+    indicadores = service.indicadores(data_inicio, data_fim, origem=origem)
     return success_response(
         indicadores.model_dump(mode="json"), message="Indicadores da CCIH calculados com sucesso."
     )

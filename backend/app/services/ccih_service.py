@@ -28,17 +28,22 @@ class CCIHService:
         self.repository = CCIHRepository(db)
 
     def indicadores(
-        self, data_inicio: date | None = None, data_fim: date | None = None
+        self,
+        data_inicio: date | None = None,
+        data_fim: date | None = None,
+        origem: str | None = None,
     ) -> IndicadoresCCIHOut:
         hoje = date.today()
         inicio = data_inicio or _primeiro_dia_do_mes(hoje)
         fim = data_fim or hoje
 
-        total_solicitacoes = self.repository.total_solicitacoes(inicio, fim)
+        total_solicitacoes = self.repository.total_solicitacoes(inicio, fim, origem=origem)
 
-        total_finalizadas = self.repository.total_culturas_por_resultado(inicio, fim)
+        total_finalizadas = self.repository.total_culturas_por_resultado(
+            inicio, fim, origem=origem
+        )
         total_positivas = self.repository.total_culturas_por_resultado(
-            inicio, fim, resultado=ResultadoCulturaEnum.POSITIVA
+            inicio, fim, resultado=ResultadoCulturaEnum.POSITIVA, origem=origem
         )
 
         taxa_positividade = (
@@ -47,13 +52,13 @@ class CCIHService:
             else 0.0
         )
 
-        distribuicao_raw = self.repository.distribuicao_por_setor(inicio, fim)
+        distribuicao_raw = self.repository.distribuicao_por_setor(inicio, fim, origem=origem)
         distribuicao = [
             DistribuicaoSetorOut(setor=setor, total_positivas=total)
             for setor, total in distribuicao_raw
         ]
 
-        perfil_raw = self.repository.perfil_microbiologico(inicio, fim)
+        perfil_raw = self.repository.perfil_microbiologico(inicio, fim, origem=origem)
         total_isolados = sum(qtd for _, qtd in perfil_raw)
         perfil = [
             PerfilMicrobiologicoOut(
@@ -66,7 +71,7 @@ class CCIHService:
             for nome, quantidade in perfil_raw
         ]
 
-        resistencia_raw = self.repository.taxa_resistencia(inicio, fim)
+        resistencia_raw = self.repository.taxa_resistencia(inicio, fim, origem=origem)
         resistencia = [
             TaxaResistenciaOut(
                 antimicrobiano=nome,
@@ -86,6 +91,7 @@ class CCIHService:
         return IndicadoresCCIHOut(
             periodo_inicio=inicio,
             periodo_fim=fim,
+            filtro_setor=origem,
             total_solicitacoes=total_solicitacoes,
             total_culturas_positivas=total_positivas,
             taxa_positividade=taxa_positividade,

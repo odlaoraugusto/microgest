@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import { api, extrairMensagemErro } from "../services/api";
+import { listarSetores } from "../services/setorService";
 
 function hojeISO() {
   return new Date().toISOString().slice(0, 10);
@@ -73,17 +74,22 @@ function RelatorioCard({ titulo, descricao, botaoLabel, onBaixar }: RelatorioCar
 export default function RelatoriosPage() {
   const [dataInicio, setDataInicio] = useState(primeiroDiaDoMesISO());
   const [dataFim, setDataFim] = useState(hojeISO());
+  const [setor, setSetor] = useState("");
+  const [setoresCatalogo, setSetoresCatalogo] = useState<string[]>([]);
   const [baixandoCcih, setBaixandoCcih] = useState(false);
   const [erroCcih, setErroCcih] = useState<string | null>(null);
+
+  useEffect(() => {
+    listarSetores().then((res) => setSetoresCatalogo(res.items.map((s) => s.nome)));
+  }, []);
 
   async function handleBaixarCcih() {
     setBaixandoCcih(true);
     setErroCcih(null);
     try {
-      await baixarArquivo("/api/relatorios/ccih.pdf", "microgest_relatorio_ccih.pdf", {
-        data_inicio: dataInicio,
-        data_fim: dataFim,
-      });
+      const params: Record<string, string> = { data_inicio: dataInicio, data_fim: dataFim };
+      if (setor) params.origem = setor;
+      await baixarArquivo("/api/relatorios/ccih.pdf", "microgest_relatorio_ccih.pdf", params);
     } catch (err: unknown) {
       setErroCcih(extrairMensagemErro(err, "Não foi possível baixar o relatório."));
     } finally {
@@ -138,6 +144,17 @@ export default function RelatoriosPage() {
           <div className="mg-field">
             <label>Até</label>
             <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+          </div>
+          <div className="mg-field" style={{ gridColumn: "1 / -1" }}>
+            <label>Setor</label>
+            <select value={setor} onChange={(e) => setSetor(e.target.value)}>
+              <option value="">Todos os setores</option>
+              {setoresCatalogo.map((nome) => (
+                <option key={nome} value={nome}>
+                  {nome}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
