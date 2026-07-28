@@ -102,6 +102,17 @@ export default function CcihPage() {
 
       {!erro && !carregando && indicadores && (
         <>
+          <p style={{ margin: "-8px 0 16px 0", fontSize: 13, color: "var(--mg-cinza-600)" }}>
+            Indicadores de{" "}
+            {new Date(`${indicadores.periodo_inicio}T00:00:00`).toLocaleDateString("pt-BR")} até{" "}
+            {new Date(`${indicadores.periodo_fim}T00:00:00`).toLocaleDateString("pt-BR")} ·{" "}
+            {indicadores.filtro_setor ? (
+              <strong>Setor: {indicadores.filtro_setor}</strong>
+            ) : (
+              "todos os setores"
+            )}
+          </p>
+
           <div style={{ display: "flex", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
             <div className="mg-card" style={{ flex: 1, minWidth: 160 }}>
               <p style={{ margin: 0, fontSize: 13, color: "var(--mg-cinza-600)" }}>Solicitações</p>

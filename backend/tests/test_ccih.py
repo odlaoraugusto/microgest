@@ -112,6 +112,47 @@ def test_filtro_por_setor(authenticated_client):
     assert body["taxa_resistencia"][0]["antimicrobiano"] == "Antimicrobiano c10"
 
 
+def test_taxa_positividade_respeita_filtro_de_setor(authenticated_client):
+    # UTI: 1 cultura positiva (100%). Enfermaria: 1 cultura negativa (0%).
+    # Geral: 1 de 2 (50%) - confere que a taxa por setor não é só a geral
+    # repetida, ela recalcula sobre o subconjunto filtrado.
+    paciente_uti = authenticated_client.post(
+        "/api/pacientes", json={"nome": "Paciente UTI", "prontuario": "c12"}
+    ).json()["data"]
+    solicitacao_uti = authenticated_client.post(
+        "/api/solicitacoes",
+        json={"paciente_id": paciente_uti["id"], "material": "Hemocultura", "origem": "UTI"},
+    ).json()["data"]
+    authenticated_client.post(
+        "/api/microbiologia/culturas",
+        json={"solicitacao_id": solicitacao_uti["id"], "resultado": "POSITIVA"},
+    )
+
+    paciente_enf = authenticated_client.post(
+        "/api/pacientes", json={"nome": "Paciente Enfermaria", "prontuario": "c13"}
+    ).json()["data"]
+    solicitacao_enf = authenticated_client.post(
+        "/api/solicitacoes",
+        json={"paciente_id": paciente_enf["id"], "material": "Urina", "origem": "Enfermaria"},
+    ).json()["data"]
+    authenticated_client.post(
+        "/api/microbiologia/culturas",
+        json={"solicitacao_id": solicitacao_enf["id"], "resultado": "NEGATIVA"},
+    )
+
+    geral = authenticated_client.get("/api/ccih/indicadores").json()["data"]
+    uti = authenticated_client.get(
+        "/api/ccih/indicadores", params={"origem": "UTI"}
+    ).json()["data"]
+    enfermaria = authenticated_client.get(
+        "/api/ccih/indicadores", params={"origem": "Enfermaria"}
+    ).json()["data"]
+
+    assert geral["taxa_positividade"] == 50.0
+    assert uti["taxa_positividade"] == 100.0
+    assert enfermaria["taxa_positividade"] == 0.0
+
+
 def test_perfil_microbiologico_calcula_percentual(authenticated_client):
     _fluxo_positivo_com_antibiograma(authenticated_client, "c5", nome_micro="Klebsiella pneumoniae")
     _fluxo_positivo_com_antibiograma(authenticated_client, "c6", nome_micro="Klebsiella pneumoniae")
