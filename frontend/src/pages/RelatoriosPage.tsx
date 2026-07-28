@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
-import { api, extrairMensagemErro } from "../services/api";
+import { api, extrairMensagemErroDownload } from "../services/api";
 import { listarSetores } from "../services/setorService";
 
 function hojeISO() {
@@ -53,7 +53,7 @@ function RelatorioCard({ titulo, descricao, botaoLabel, onBaixar }: RelatorioCar
     try {
       await onBaixar();
     } catch (err: unknown) {
-      setErro(extrairMensagemErro(err, "Não foi possível baixar o relatório."));
+      setErro(await extrairMensagemErroDownload(err));
     } finally {
       setBaixando(false);
     }
@@ -91,7 +91,7 @@ export default function RelatoriosPage() {
       if (setor) params.origem = setor;
       await baixarArquivo("/api/relatorios/ccih.pdf", "microgest_relatorio_ccih.pdf", params);
     } catch (err: unknown) {
-      setErroCcih(extrairMensagemErro(err, "Não foi possível baixar o relatório."));
+      setErroCcih(await extrairMensagemErroDownload(err));
     } finally {
       setBaixandoCcih(false);
     }
