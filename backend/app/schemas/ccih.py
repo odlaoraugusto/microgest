@@ -23,6 +23,8 @@ class TaxaResistenciaOut(BaseModel):
     total_testado: int
     total_resistente: int
     percentual_resistente: float
+    total_sensivel: int
+    percentual_sensivel: float
 
 
 class IndicadoresCCIHOut(BaseModel):

@@ -75,8 +75,12 @@ class CCIHService:
                 percentual_resistente=round((resistente / testado) * 100, 1)
                 if testado > 0
                 else 0.0,
+                total_sensivel=sensivel,
+                percentual_sensivel=round((sensivel / testado) * 100, 1)
+                if testado > 0
+                else 0.0,
             )
-            for nome, testado, resistente in resistencia_raw
+            for nome, testado, resistente, sensivel in resistencia_raw
         ]
 
         return IndicadoresCCIHOut(

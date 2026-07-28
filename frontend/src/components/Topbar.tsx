@@ -1,4 +1,4 @@
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 interface TopbarProps {
@@ -59,35 +59,6 @@ export default function Topbar({ titulo, subtitulo }: TopbarProps) {
             }}
           />
         </div>
-
-        <button
-          type="button"
-          title="Notificações"
-          style={{
-            position: "relative",
-            border: "1px solid var(--mg-cinza-200)",
-            background: "var(--mg-branco)",
-            borderRadius: "var(--mg-radius-sm)",
-            width: 34,
-            height: 34,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Bell size={18} strokeWidth={2} color="var(--mg-cinza-600)" />
-          <span
-            style={{
-              position: "absolute",
-              top: 6,
-              right: 7,
-              width: 7,
-              height: 7,
-              borderRadius: "50%",
-              background: "var(--mg-alerta)",
-            }}
-          />
-        </button>
 
         {usuario && (
           <span style={{ fontSize: 13, color: "var(--mg-cinza-600)" }}>{usuario.perfil}</span>

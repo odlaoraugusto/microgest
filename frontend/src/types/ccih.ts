@@ -14,6 +14,8 @@ export interface TaxaResistencia {
   total_testado: number;
   total_resistente: number;
   percentual_resistente: number;
+  total_sensivel: number;
+  percentual_sensivel: number;
 }
 
 export interface IndicadoresCCIH {

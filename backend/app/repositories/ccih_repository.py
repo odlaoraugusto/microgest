@@ -88,13 +88,16 @@ class CCIHRepository:
         )
         return list(self.db.execute(stmt).all())
 
-    def taxa_resistencia(self, inicio: date, fim: date) -> list[tuple[str, int, int]]:
+    def taxa_resistencia(self, inicio: date, fim: date) -> list[tuple[str, int, int, int]]:
         total_testado = func.count(AntibiogramaResultado.id)
         total_resistente = func.sum(
             case((AntibiogramaResultado.resultado == ResultadoSIREnum.RESISTENTE, 1), else_=0)
         )
+        total_sensivel = func.sum(
+            case((AntibiogramaResultado.resultado == ResultadoSIREnum.SENSIVEL, 1), else_=0)
+        )
         stmt = (
-            select(Antimicrobiano.nome, total_testado, total_resistente)
+            select(Antimicrobiano.nome, total_testado, total_resistente, total_sensivel)
             .select_from(AntibiogramaResultado)
             .join(Antimicrobiano, Antimicrobiano.id == AntibiogramaResultado.antimicrobiano_id)
             .join(Antibiograma, Antibiograma.id == AntibiogramaResultado.antibiograma_id)
@@ -107,4 +110,7 @@ class CCIHRepository:
             .order_by(total_testado.desc())
         )
         resultado = self.db.execute(stmt).all()
-        return [(nome, testado, resistente or 0) for nome, testado, resistente in resultado]
+        return [
+            (nome, testado, resistente or 0, sensivel or 0)
+            for nome, testado, resistente, sensivel in resultado
+        ]

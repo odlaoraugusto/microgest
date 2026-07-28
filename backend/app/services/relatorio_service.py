@@ -235,11 +235,28 @@ class RelatorioService:
         elementos.append(Paragraph("Mapa de Resistência", styles["Heading2"]))
         if indicadores.taxa_resistencia:
             dados_resist = [
-                [r.antimicrobiano, str(r.total_testado), str(r.total_resistente), f"{r.percentual_resistente}%"]
+                [
+                    r.antimicrobiano,
+                    str(r.total_testado),
+                    str(r.total_resistente),
+                    f"{r.percentual_resistente}%",
+                    str(r.total_sensivel),
+                    f"{r.percentual_sensivel}%",
+                ]
                 for r in indicadores.taxa_resistencia
             ]
             elementos.append(
-                _tabela(dados_resist, ["Antimicrobiano", "Testados", "Resistentes", "% Resistência"])
+                _tabela(
+                    dados_resist,
+                    [
+                        "Antimicrobiano",
+                        "Testados",
+                        "Resistentes",
+                        "% Resistência",
+                        "Sensíveis",
+                        "% Sensibilidade",
+                    ],
+                )
             )
         else:
             elementos.append(Paragraph("Nenhum antibiograma liberado no período.", styles["Normal"]))

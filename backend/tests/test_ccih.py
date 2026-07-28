@@ -114,6 +114,56 @@ def test_taxa_resistencia(authenticated_client):
     assert item["total_testado"] == 1
     assert item["total_resistente"] == 1
     assert item["percentual_resistente"] == 100.0
+    assert item["total_sensivel"] == 0
+    assert item["percentual_sensivel"] == 0.0
+
+
+def test_taxa_sensibilidade_mesmo_antimicrobiano(authenticated_client):
+    # Duas culturas testadas contra o "mesmo" antimicrobiano (mesmo prontuário
+    # usado como sufixo do nome em _fluxo_positivo_com_antibiograma) - uma
+    # resistente, outra sensível - para conferir que os dois percentuais são
+    # calculados sobre o total testado, não isoladamente.
+    paciente = authenticated_client.post(
+        "/api/pacientes", json={"nome": "Paciente CCIH Sensibilidade", "prontuario": "c9"}
+    ).json()["data"]
+    antimicrobiano = authenticated_client.post(
+        "/api/antimicrobianos", json={"nome": "Antimicrobiano c9"}
+    ).json()["data"]
+
+    for resultado_sir in ("RESISTENTE", "SENSIVEL"):
+        solicitacao = authenticated_client.post(
+            "/api/solicitacoes",
+            json={"paciente_id": paciente["id"], "material": "Hemocultura", "origem": "UTI"},
+        ).json()["data"]
+        microrganismo = _get_or_criar_microrganismo(authenticated_client, "Klebsiella pneumoniae")
+        cultura = authenticated_client.post(
+            "/api/microbiologia/culturas",
+            json={
+                "solicitacao_id": solicitacao["id"],
+                "resultado": "POSITIVA",
+                "microrganismo_ids": [microrganismo["id"]],
+            },
+        ).json()["data"]
+        isolado_id = cultura["microrganismos"][0]["id"]
+        authenticated_client.post(
+            "/api/antibiogramas",
+            json={
+                "cultura_microrganismo_id": isolado_id,
+                "resultados": [
+                    {"antimicrobiano_id": antimicrobiano["id"], "resultado": resultado_sir}
+                ],
+            },
+        )
+
+    body = authenticated_client.get("/api/ccih/indicadores").json()["data"]
+    item = next(
+        r for r in body["taxa_resistencia"] if r["antimicrobiano"] == "Antimicrobiano c9"
+    )
+    assert item["total_testado"] == 2
+    assert item["total_resistente"] == 1
+    assert item["percentual_resistente"] == 50.0
+    assert item["total_sensivel"] == 1
+    assert item["percentual_sensivel"] == 50.0
 
 
 def test_periodo_customizado_exclui_dados_fora_do_intervalo(authenticated_client):

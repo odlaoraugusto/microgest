@@ -165,6 +165,8 @@ export default function CcihPage() {
                     <th>Testados</th>
                     <th>Resistentes</th>
                     <th>% Resistência</th>
+                    <th>Sensíveis</th>
+                    <th>% Sensibilidade</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -180,6 +182,16 @@ export default function CcihPage() {
                           }`}
                         >
                           {r.percentual_resistente}%
+                        </span>
+                      </td>
+                      <td>{r.total_sensivel}</td>
+                      <td>
+                        <span
+                          className={`mg-badge ${
+                            r.percentual_sensivel >= 50 ? "mg-badge-sucesso" : "mg-badge-alerta"
+                          }`}
+                        >
+                          {r.percentual_sensivel}%
                         </span>
                       </td>
                     </tr>
