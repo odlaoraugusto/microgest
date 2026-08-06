@@ -37,6 +37,17 @@ class CulturaMicrorganismoOut(BaseModel):
 
     id: uuid.UUID
     microrganismo: MicrorganismoOut
+    sem_antibiograma_padronizado: bool
+
+
+class IsoladoSemAntibiogramaIn(BaseModel):
+    """
+    Marca/desmarca um isolado como sem padronização de antibiograma pelo
+    BrCAST - quando marcado, esse isolado deixa de ser exigido na
+    liberação técnica da cultura (ver CulturaRepository.isolados_sem_antibiograma).
+    """
+
+    sem_antibiograma_padronizado: bool
 
 
 class CulturaOut(BaseModel):

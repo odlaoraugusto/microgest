@@ -3,6 +3,7 @@ import {
   Cultura,
   CulturaFormData,
   CulturaListagem,
+  CulturaMicrorganismo,
   CulturaParcialListagem,
 } from "../types/cultura";
 
@@ -60,4 +61,15 @@ export async function liberarCultura(id: string): Promise<Cultura> {
 
 export async function removerCultura(id: string): Promise<void> {
   await api.delete(`/api/microbiologia/culturas/${id}`);
+}
+
+export async function marcarIsoladoSemAntibiograma(
+  isoladoId: string,
+  valor: boolean
+): Promise<CulturaMicrorganismo> {
+  const response = await api.put<ApiResponse<CulturaMicrorganismo>>(
+    `/api/microbiologia/isolados/${isoladoId}/sem-antibiograma`,
+    { sem_antibiograma_padronizado: valor }
+  );
+  return response.data.data;
 }

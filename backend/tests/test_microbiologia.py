@@ -272,6 +272,108 @@ def test_resultados_parciais_lista_culturas_em_andamento(authenticated_client):
     assert body["items"][0]["pendencia"] == "Aguardando resultado da cultura"
 
 
+def test_marcar_isolado_sem_antibiograma_padronizado(authenticated_client):
+    paciente = _criar_paciente(authenticated_client)
+    solicitacao = _criar_solicitacao(authenticated_client, paciente["id"])
+    microrganismo = _criar_microrganismo(authenticated_client)
+    criada = authenticated_client.post(
+        "/api/microbiologia/culturas",
+        json={
+            "solicitacao_id": solicitacao["id"],
+            "resultado": "POSITIVA",
+            "microrganismo_ids": [microrganismo["id"]],
+        },
+    ).json()["data"]
+    isolado_id = criada["microrganismos"][0]["id"]
+    assert criada["microrganismos"][0]["sem_antibiograma_padronizado"] is False
+
+    response = authenticated_client.put(
+        f"/api/microbiologia/isolados/{isolado_id}/sem-antibiograma",
+        json={"sem_antibiograma_padronizado": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["data"]["sem_antibiograma_padronizado"] is True
+
+    cultura_atualizada = authenticated_client.get(
+        f"/api/microbiologia/culturas/{criada['id']}"
+    ).json()["data"]
+    assert cultura_atualizada["microrganismos"][0]["sem_antibiograma_padronizado"] is True
+
+
+def test_marcar_isolado_sem_antibiograma_isolado_inexistente(authenticated_client):
+    response = authenticated_client.put(
+        "/api/microbiologia/isolados/00000000-0000-0000-0000-000000000000/sem-antibiograma",
+        json={"sem_antibiograma_padronizado": True},
+    )
+
+    assert response.status_code == 404
+
+
+def test_permite_liberar_cultura_positiva_com_isolado_dispensado_de_antibiograma(
+    authenticated_client,
+):
+    paciente = _criar_paciente(authenticated_client)
+    solicitacao = _criar_solicitacao(authenticated_client, paciente["id"])
+    microrganismo = _criar_microrganismo(authenticated_client)
+    criada = authenticated_client.post(
+        "/api/microbiologia/culturas",
+        json={
+            "solicitacao_id": solicitacao["id"],
+            "resultado": "POSITIVA",
+            "microrganismo_ids": [microrganismo["id"]],
+        },
+    ).json()["data"]
+    isolado_id = criada["microrganismos"][0]["id"]
+
+    authenticated_client.put(
+        f"/api/microbiologia/isolados/{isolado_id}/sem-antibiograma",
+        json={"sem_antibiograma_padronizado": True},
+    )
+
+    parciais = authenticated_client.get("/api/microbiologia/culturas/parciais").json()["data"]
+    pendencia = next(item["pendencia"] for item in parciais["items"] if item["id"] == criada["id"])
+    assert pendencia == "Pronta para liberação"
+
+    response = authenticated_client.post(f"/api/microbiologia/culturas/{criada['id']}/liberar")
+
+    assert response.status_code == 200
+    assert response.json()["data"]["liberado_tecnicamente"] is True
+
+
+def test_nao_permite_liberar_cultura_com_isolado_nao_dispensado_ainda_pendente(
+    authenticated_client,
+):
+    """
+    Cultura com 2 isolados: um dispensado (sem antibiograma padronizado) e
+    outro sem essa marcação e sem antibiograma - a liberação deve
+    continuar bloqueada por causa do isolado não dispensado.
+    """
+    paciente = _criar_paciente(authenticated_client)
+    solicitacao = _criar_solicitacao(authenticated_client, paciente["id"])
+    microrganismo_1 = _criar_microrganismo(authenticated_client, nome="Klebsiella pneumoniae")
+    microrganismo_2 = _criar_microrganismo(authenticated_client, nome="Escherichia coli")
+    criada = authenticated_client.post(
+        "/api/microbiologia/culturas",
+        json={
+            "solicitacao_id": solicitacao["id"],
+            "resultado": "POSITIVA",
+            "microrganismo_ids": [microrganismo_1["id"], microrganismo_2["id"]],
+        },
+    ).json()["data"]
+    isolado_dispensado_id = criada["microrganismos"][0]["id"]
+
+    authenticated_client.put(
+        f"/api/microbiologia/isolados/{isolado_dispensado_id}/sem-antibiograma",
+        json={"sem_antibiograma_padronizado": True},
+    )
+
+    response = authenticated_client.post(f"/api/microbiologia/culturas/{criada['id']}/liberar")
+
+    assert response.status_code == 422
+    assert "antibiograma" in response.json()["message"].lower()
+
+
 def test_resultados_parciais_mostra_pendencia_de_antibiograma(authenticated_client):
     paciente = _criar_paciente(authenticated_client)
     solicitacao = _criar_solicitacao(authenticated_client, paciente["id"])

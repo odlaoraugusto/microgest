@@ -7,10 +7,19 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user
+from app.core.exceptions import NotFoundError
 from app.core.response import success_response
 from app.db.session import get_db
 from app.models.cultura import GrupoCulturaEnum, ResultadoCulturaEnum
-from app.schemas.cultura import CulturaCreate, CulturaOut, CulturaParcialOut, CulturaUpdate
+from app.repositories.cultura_microrganismo_repository import CulturaMicrorganismoRepository
+from app.schemas.cultura import (
+    CulturaCreate,
+    CulturaMicrorganismoOut,
+    CulturaOut,
+    CulturaParcialOut,
+    CulturaUpdate,
+    IsoladoSemAntibiogramaIn,
+)
 from app.services.cultura_service import CulturaService
 
 router = APIRouter(
@@ -106,3 +115,25 @@ def remover_cultura(cultura_id: uuid.UUID, db: Session = Depends(get_db)):
     service = CulturaService(db)
     service.remover(cultura_id)
     return success_response(message="Cultura removida com sucesso.")
+
+
+@router.put("/isolados/{isolado_id}/sem-antibiograma")
+def marcar_isolado_sem_antibiograma(
+    isolado_id: uuid.UUID, dados: IsoladoSemAntibiogramaIn, db: Session = Depends(get_db)
+):
+    """
+    Marca (ou desmarca) um isolado como "sem antibiograma padronizado
+    (BrCAST)" - dispensa esse isolado específico da exigência de
+    antibiograma completo ao liberar a cultura (útil para microrganismos
+    sem protocolo BrCAST definido).
+    """
+    repository = CulturaMicrorganismoRepository(db)
+    isolado = repository.marcar_sem_antibiograma(
+        isolado_id, dados.sem_antibiograma_padronizado
+    )
+    if not isolado:
+        raise NotFoundError("Isolado (microrganismo da cultura) não encontrado.")
+    return success_response(
+        CulturaMicrorganismoOut.model_validate(isolado).model_dump(mode="json"),
+        message="Isolado atualizado com sucesso.",
+    )

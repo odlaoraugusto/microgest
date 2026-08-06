@@ -1,19 +1,27 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
-import PacienteSelect from "../components/PacienteSelect";
 import MicrorganismoMultiSelect from "../components/MicrorganismoMultiSelect";
+import ResultadosSIREditor from "../components/ResultadosSIREditor";
 import { atualizarExame, criarExame, obterExame } from "../services/exameService";
-import { listarAntibiogramas } from "../services/antibiogramaService";
+import {
+  atualizarAntibiograma,
+  criarAntibiograma,
+  listarAntibiogramas,
+} from "../services/antibiogramaService";
+import { marcarIsoladoSemAntibiograma } from "../services/culturaService";
 import { listarMateriais } from "../services/materialService";
 import { listarSetores } from "../services/setorService";
+import { listarPacientes } from "../services/pacienteService";
 import { extrairMensagemErro } from "../services/api";
+import { useDebounce } from "../hooks/useDebounce";
 import { CulturaMicrorganismo, GrupoCultura, ResultadoCultura } from "../types/cultura";
 import { ExameFormData } from "../types/exame";
-import { Antibiograma } from "../types/antibiograma";
+import { Antibiograma, ResultadoAntimicrobiano } from "../types/antibiograma";
 
 const FORM_INICIAL: ExameFormData = {
-  paciente_id: "",
+  paciente_prontuario: "",
+  paciente_nome: "",
   material: "",
   origem: "",
   prioridade: "ROTINA",
@@ -53,12 +61,20 @@ export default function ExameFormPage() {
   const [antibiogramasPorIsolado, setAntibiogramasPorIsolado] = useState<
     Record<string, Antibiograma | null>
   >({});
+  const [resultadosPorIsolado, setResultadosPorIsolado] = useState<
+    Record<string, ResultadoAntimicrobiano[]>
+  >({});
+  const [salvandoAntibiogramaId, setSalvandoAntibiogramaId] = useState<string | null>(null);
+  const [salvoAntibiogramaId, setSalvoAntibiogramaId] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(editando);
   const [carregandoAntibiogramas, setCarregandoAntibiogramas] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [materiaisCatalogo, setMateriaisCatalogo] = useState<string[]>([]);
   const [setoresCatalogo, setSetoresCatalogo] = useState<string[]>([]);
+  const [buscandoPaciente, setBuscandoPaciente] = useState(false);
+  const [pacienteEncontrado, setPacienteEncontrado] = useState<boolean | null>(null);
+  const prontuarioDebounced = useDebounce(form.paciente_prontuario, 350);
 
   // Carrega as sugestões dos catálogos de material/setor uma vez, na montagem do form.
   useEffect(() => {
@@ -71,7 +87,8 @@ export default function ExameFormPage() {
     obterExame(id)
       .then((c) => {
         setForm({
-          paciente_id: c.solicitacao?.paciente_id ?? "",
+          paciente_prontuario: c.solicitacao?.paciente?.prontuario ?? "",
+          paciente_nome: c.solicitacao?.paciente?.nome ?? "",
           material: c.solicitacao?.material ?? "",
           origem: c.solicitacao?.origem ?? "",
           prioridade: c.solicitacao?.prioridade ?? "ROTINA",
@@ -118,6 +135,90 @@ export default function ExameFormPage() {
     };
   }, [editando, form.resultado, microrganismosVinculados]);
 
+  // Inicializa o editor local de S/I/R de cada isolado a partir do
+  // antibiograma já carregado (se existir) - só na primeira vez que o
+  // isolado aparece, pra não sobrescrever edições ainda não salvas.
+  useEffect(() => {
+    setResultadosPorIsolado((prev) => {
+      let mudou = false;
+      const novo = { ...prev };
+      for (const m of microrganismosVinculados) {
+        if (novo[m.id] === undefined) {
+          const antibiograma = antibiogramasPorIsolado[m.id];
+          novo[m.id] = antibiograma
+            ? antibiograma.resultados.map((r) => ({
+                antimicrobiano_id: r.antimicrobiano.id,
+                resultado: r.resultado,
+              }))
+            : [];
+          mudou = true;
+        }
+      }
+      return mudou ? novo : prev;
+    });
+  }, [microrganismosVinculados, antibiogramasPorIsolado]);
+
+  // Ao digitar o prontuário (só na criação), busca com debounce se já
+  // existe um paciente com esse prontuário exato - se achar, preenche o
+  // nome automaticamente; se não achar, avisa que será cadastrado um novo.
+  useEffect(() => {
+    if (editando) return;
+    if (!prontuarioDebounced) {
+      setPacienteEncontrado(null);
+      return;
+    }
+    let cancelado = false;
+    setBuscandoPaciente(true);
+    listarPacientes(prontuarioDebounced, 1, 5)
+      .then((res) => {
+        if (cancelado) return;
+        const encontrado = res.items.find((p) => p.prontuario === prontuarioDebounced);
+        if (encontrado) {
+          setPacienteEncontrado(true);
+          setForm((prev) => ({ ...prev, paciente_nome: encontrado.nome }));
+        } else {
+          setPacienteEncontrado(false);
+        }
+      })
+      .finally(() => {
+        if (!cancelado) setBuscandoPaciente(false);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [prontuarioDebounced, editando]);
+
+  async function handleToggleSemAntibiograma(isoladoId: string, valor: boolean) {
+    try {
+      const atualizado = await marcarIsoladoSemAntibiograma(isoladoId, valor);
+      setMicrorganismosVinculados((prev) =>
+        prev.map((item) => (item.id === isoladoId ? atualizado : item))
+      );
+    } catch (err: unknown) {
+      window.alert(extrairMensagemErro(err, "Não foi possível atualizar o isolado."));
+    }
+  }
+
+  async function handleSalvarAntibiograma(isolado: CulturaMicrorganismo) {
+    const resultados = resultadosPorIsolado[isolado.id] ?? [];
+    const antibiogramaExistente = antibiogramasPorIsolado[isolado.id];
+    setSalvandoAntibiogramaId(isolado.id);
+    try {
+      const salvo = antibiogramaExistente
+        ? await atualizarAntibiograma(antibiogramaExistente.id, { resultados })
+        : await criarAntibiograma({ cultura_microrganismo_id: isolado.id, resultados });
+      setAntibiogramasPorIsolado((prev) => ({ ...prev, [isolado.id]: salvo }));
+      setSalvoAntibiogramaId(isolado.id);
+      setTimeout(() => {
+        setSalvoAntibiogramaId((atual) => (atual === isolado.id ? null : atual));
+      }, 1500);
+    } catch (err: unknown) {
+      window.alert(extrairMensagemErro(err, "Não foi possível salvar o antibiograma."));
+    } finally {
+      setSalvandoAntibiogramaId(null);
+    }
+  }
+
   function handleChange<K extends keyof ExameFormData>(campo: K, valor: ExameFormData[K]) {
     setForm((prev) => ({ ...prev, [campo]: valor }));
   }
@@ -146,7 +247,7 @@ export default function ExameFormPage() {
         observacoes_cultura: form.observacoes_cultura || null,
       };
       if (editando && id) {
-        const { paciente_id, ...resto } = payload;
+        const { paciente_prontuario, paciente_nome, ...resto } = payload;
         await atualizarExame(id, resto);
         navigate("/exames");
       } else {
@@ -164,6 +265,20 @@ export default function ExameFormPage() {
 
   const mostrarSecaoAntibiograma =
     editando && form.resultado === "POSITIVA" && microrganismosVinculados.length > 0;
+
+  // Mensagem de apoio abaixo do campo Prontuário (só na criação).
+  let mensagemProntuario: string | null = null;
+  let corMensagemProntuario = "var(--mg-cinza-400)";
+  if (!editando) {
+    if (buscandoPaciente) {
+      mensagemProntuario = "Buscando...";
+    } else if (pacienteEncontrado === true) {
+      mensagemProntuario = "Paciente já cadastrado";
+      corMensagemProntuario = "var(--mg-secundaria)";
+    } else if (pacienteEncontrado === false && form.paciente_prontuario.length > 0) {
+      mensagemProntuario = "Paciente novo será cadastrado automaticamente";
+    }
+  }
 
   return (
     <MainLayout
@@ -183,14 +298,35 @@ export default function ExameFormPage() {
 
             <h3 style={{ margin: "0 0 12px 0" }}>Solicitação</h3>
             <div className="mg-form-grid">
-              <div className="mg-field" style={{ gridColumn: "1 / -1" }}>
+              <div className="mg-field">
+                <label>Prontuário *</label>
+                {editando ? (
+                  <input value={form.paciente_prontuario} disabled />
+                ) : (
+                  <input
+                    required
+                    value={form.paciente_prontuario}
+                    placeholder="Número do prontuário"
+                    onChange={(e) => handleChange("paciente_prontuario", e.target.value)}
+                  />
+                )}
+                {mensagemProntuario && (
+                  <span style={{ fontSize: 12, color: corMensagemProntuario }}>
+                    {mensagemProntuario}
+                  </span>
+                )}
+              </div>
+
+              <div className="mg-field">
                 <label>Paciente *</label>
                 {editando ? (
-                  <input value={form.paciente_id} disabled />
+                  <input value={form.paciente_nome} disabled />
                 ) : (
-                  <PacienteSelect
-                    value={form.paciente_id}
-                    onChange={(pacienteId) => handleChange("paciente_id", pacienteId)}
+                  <input
+                    required
+                    value={form.paciente_nome}
+                    placeholder="Nome do paciente"
+                    onChange={(e) => handleChange("paciente_nome", e.target.value)}
                   />
                 )}
               </div>
@@ -227,20 +363,6 @@ export default function ExameFormPage() {
               </div>
 
               <div className="mg-field">
-                <label>Prioridade</label>
-                <select
-                  value={form.prioridade}
-                  onChange={(e) =>
-                    handleChange("prioridade", e.target.value as ExameFormData["prioridade"])
-                  }
-                >
-                  <option value="ROTINA">Rotina</option>
-                  <option value="URGENTE">Urgente</option>
-                  <option value="EMERGENCIA">Emergência</option>
-                </select>
-              </div>
-
-              <div className="mg-field">
                 <label>Data da coleta</label>
                 <input
                   type="date"
@@ -267,7 +389,7 @@ export default function ExameFormPage() {
             <h3 style={{ margin: "0 0 12px 0" }}>Resultado da cultura</h3>
             <div className="mg-form-grid">
               <div className="mg-field">
-                <label>Grupo</label>
+                <label>Exame</label>
                 <select
                   value={form.grupo}
                   onChange={(e) => handleChange("grupo", e.target.value as GrupoCultura)}
@@ -334,22 +456,27 @@ export default function ExameFormPage() {
                 {carregandoAntibiogramas ? (
                   <p style={{ color: "var(--mg-cinza-600)" }}>Carregando...</p>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {microrganismosVinculados.map((m) => {
                       const antibiograma = antibiogramasPorIsolado[m.id];
+                      const resultados = resultadosPorIsolado[m.id] ?? [];
                       return (
                         <div
                           key={m.id}
                           style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
                             border: "1px solid var(--mg-cinza-200)",
                             borderRadius: "var(--mg-radius-sm)",
-                            padding: "10px 14px",
+                            padding: "12px 14px",
                           }}
                         >
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              marginBottom: 10,
+                            }}
+                          >
                             <strong style={{ fontSize: 14 }}>{m.microrganismo.nome}</strong>
                             {antibiograma && (
                               <span
@@ -361,26 +488,51 @@ export default function ExameFormPage() {
                               </span>
                             )}
                           </div>
-                          {antibiograma ? (
-                            <button
-                              type="button"
-                              className="mg-btn mg-btn-outline"
-                              onClick={() =>
-                                navigate(`/antibiogramas/${antibiograma.id}/editar?voltar_para=${id}`)
+
+                          <label
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              fontSize: 13,
+                              marginBottom: m.sem_antibiograma_padronizado ? 0 : 10,
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={m.sem_antibiograma_padronizado}
+                              onChange={(e) =>
+                                handleToggleSemAntibiograma(m.id, e.target.checked)
                               }
-                            >
-                              Editar antibiograma
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="mg-btn mg-btn-secondary"
-                              onClick={() =>
-                                navigate(`/antibiogramas/novo?isolado_id=${m.id}&voltar_para=${id}`)
-                              }
-                            >
-                              + Lançar antibiograma
-                            </button>
+                            />
+                            Sem antibiograma padronizado (BrCAST)
+                          </label>
+
+                          {!m.sem_antibiograma_padronizado && (
+                            <>
+                              <ResultadosSIREditor
+                                value={resultados}
+                                onChange={(novos) =>
+                                  setResultadosPorIsolado((prev) => ({
+                                    ...prev,
+                                    [m.id]: novos,
+                                  }))
+                                }
+                              />
+                              <button
+                                type="button"
+                                className="mg-btn mg-btn-secondary"
+                                style={{ marginTop: 4 }}
+                                disabled={salvandoAntibiogramaId === m.id}
+                                onClick={() => handleSalvarAntibiograma(m)}
+                              >
+                                {salvoAntibiogramaId === m.id
+                                  ? "Salvo!"
+                                  : salvandoAntibiogramaId === m.id
+                                    ? "Salvando..."
+                                    : "Salvar antibiograma"}
+                              </button>
+                            </>
                           )}
                         </div>
                       );

@@ -23,15 +23,23 @@ def _criar_microrganismo(authenticated_client, nome="Klebsiella pneumoniae"):
     ).json()["data"]
 
 
-def _criar_exame(authenticated_client, paciente_id, **extra):
-    payload = {"paciente_id": paciente_id, "material": "Hemocultura", **extra}
+def _criar_exame(authenticated_client, paciente_id=None, prontuario="p1", nome="Paciente Exame", **extra):
+    """
+    `paciente_id` é aceito só por compatibilidade com os testes que já
+    tinham um paciente pronto - o campo em si não existe mais no payload,
+    o exame sempre lança por prontuário+nome (paciente automático).
+    """
+    payload = {
+        "paciente_prontuario": prontuario,
+        "paciente_nome": nome,
+        "material": "Hemocultura",
+        **extra,
+    }
     return authenticated_client.post("/api/exames", json=payload)
 
 
 def test_criar_exame_com_sucesso(authenticated_client):
-    paciente = _criar_paciente(authenticated_client)
-
-    response = _criar_exame(authenticated_client, paciente["id"], resultado="NEGATIVA")
+    response = _criar_exame(authenticated_client, resultado="NEGATIVA")
 
     assert response.status_code == 201
     body = response.json()["data"]
@@ -41,9 +49,45 @@ def test_criar_exame_com_sucesso(authenticated_client):
     assert body["resultado"] == "NEGATIVA"
 
 
-def test_nao_permite_exame_para_paciente_inexistente(authenticated_client):
+def test_criar_exame_cria_paciente_automaticamente_por_prontuario(authenticated_client):
     response = _criar_exame(
-        authenticated_client, "00000000-0000-0000-0000-000000000000"
+        authenticated_client, prontuario="novo-123", nome="Fulano de Tal"
+    )
+
+    assert response.status_code == 201
+    body = response.json()["data"]
+    assert body["solicitacao"]["paciente"]["prontuario"] == "novo-123"
+    assert body["solicitacao"]["paciente"]["nome"] == "Fulano de Tal"
+
+    # o paciente realmente foi criado (não é só um campo solto na resposta)
+    listagem = authenticated_client.get("/api/pacientes?termo=novo-123").json()["data"]
+    assert listagem["total"] == 1
+
+
+def test_criar_exame_reaproveita_paciente_existente_sem_sobrescrever_nome(
+    authenticated_client,
+):
+    paciente = authenticated_client.post(
+        "/api/pacientes", json={"nome": "Nome Original", "prontuario": "p-existente"}
+    ).json()["data"]
+
+    response = _criar_exame(
+        authenticated_client, prontuario="p-existente", nome="Nome Digitado Errado"
+    )
+
+    assert response.status_code == 201
+    body = response.json()["data"]
+    assert body["solicitacao"]["paciente"]["id"] == paciente["id"]
+    assert body["solicitacao"]["paciente"]["nome"] == "Nome Original"
+
+    listagem = authenticated_client.get("/api/pacientes?termo=p-existente").json()["data"]
+    assert listagem["total"] == 1
+
+
+def test_nao_permite_exame_sem_prontuario(authenticated_client):
+    response = authenticated_client.post(
+        "/api/exames",
+        json={"paciente_nome": "Fulano", "material": "Hemocultura"},
     )
 
     assert response.status_code == 422

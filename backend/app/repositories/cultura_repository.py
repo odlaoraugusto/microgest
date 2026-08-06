@@ -87,8 +87,14 @@ class CulturaRepository(BaseRepository[Cultura]):
         IDs dos que ainda não têm nenhum antibiograma com resultado
         preenchido - usado para bloquear a liberação de culturas positivas
         incompletas.
+
+        Isolados marcados como "sem antibiograma padronizado (BrCAST)" são
+        excluídos dessa lista - eles são dispensados individualmente da
+        exigência de antibiograma (ex.: microrganismo sem protocolo BrCAST).
         """
-        isolado_ids = [cm.id for cm in cultura.microrganismos]
+        isolado_ids = [
+            cm.id for cm in cultura.microrganismos if not cm.sem_antibiograma_padronizado
+        ]
         if not isolado_ids:
             return []
 

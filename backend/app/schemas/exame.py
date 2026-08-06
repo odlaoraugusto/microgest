@@ -22,7 +22,21 @@ from app.models.solicitacao import PrioridadeEnum
 
 class ExameCreate(BaseModel):
     # Campos da Solicitação
-    paciente_id: uuid.UUID
+    paciente_prontuario: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Se já existir um paciente com este prontuário, ele é "
+        "reaproveitado (o nome cadastrado NÃO é sobrescrito). Caso "
+        "contrário, um novo paciente é criado com 'paciente_nome'.",
+    )
+    paciente_nome: str = Field(
+        ...,
+        min_length=2,
+        max_length=200,
+        description="Usado apenas para cadastrar um paciente novo, quando o "
+        "prontuário informado ainda não existe.",
+    )
     material: str = Field(..., min_length=2, max_length=100)
     origem: str | None = Field(default=None, max_length=100)
     prioridade: PrioridadeEnum = PrioridadeEnum.ROTINA

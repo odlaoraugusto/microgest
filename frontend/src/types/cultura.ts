@@ -8,6 +8,7 @@ export type GrupoCultura = "HEMOCULTURA" | "CULTURA_GERAL" | "VIGILANCIA" | "BK"
 export interface CulturaMicrorganismo {
   id: string;
   microrganismo: Microrganismo;
+  sem_antibiograma_padronizado: boolean;
 }
 
 export interface Cultura {

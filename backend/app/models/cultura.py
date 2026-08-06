@@ -84,6 +84,9 @@ class CulturaMicrorganismo(Base):
     microrganismo_id: Mapped[uuid.UUID] = mapped_column(
         GUID(), ForeignKey("microrganismos.id"), nullable=False, index=True
     )
+    sem_antibiograma_padronizado: Mapped[bool] = mapped_column(
+        default=False, server_default="false"
+    )
 
     microrganismo = relationship("Microrganismo", lazy="joined")
     cultura = relationship("Cultura", back_populates="microrganismos", lazy="joined")

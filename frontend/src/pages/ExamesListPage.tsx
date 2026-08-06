@@ -115,11 +115,11 @@ export default function ExamesListPage() {
             <table className="mg-table">
               <thead>
                 <tr>
+                  <th>Prontuário</th>
                   <th>Paciente</th>
                   <th>Material</th>
                   <th>Origem</th>
-                  <th>Prioridade</th>
-                  <th>Grupo</th>
+                  <th>Exame</th>
                   <th>Resultado</th>
                   <th>Microrganismos</th>
                   <th>Liberado</th>
@@ -129,10 +129,10 @@ export default function ExamesListPage() {
               <tbody>
                 {exames.map((c) => (
                   <tr key={c.id}>
+                    <td>{c.solicitacao?.paciente?.prontuario ?? "—"}</td>
                     <td>{c.solicitacao?.paciente?.nome ?? "—"}</td>
                     <td>{c.solicitacao?.material ?? "—"}</td>
                     <td>{c.solicitacao?.origem ?? "—"}</td>
-                    <td>{c.solicitacao?.prioridade ?? "—"}</td>
                     <td>
                       <GrupoCulturaBadge grupo={c.grupo} />
                     </td>
@@ -200,11 +200,11 @@ export default function ExamesListPage() {
             <table className="mg-table">
               <thead>
                 <tr>
+                  <th>Prontuário</th>
                   <th>Paciente</th>
                   <th>Material</th>
                   <th>Origem</th>
-                  <th>Prioridade</th>
-                  <th>Grupo</th>
+                  <th>Exame</th>
                   <th>Resultado Atual</th>
                   <th>Previsão de Liberação</th>
                   <th>Pendência</th>
@@ -214,10 +214,10 @@ export default function ExamesListPage() {
               <tbody>
                 {parciais.map((c) => (
                   <tr key={c.id}>
+                    <td>{c.solicitacao?.paciente?.prontuario ?? "—"}</td>
                     <td>{c.solicitacao?.paciente?.nome ?? "—"}</td>
                     <td>{c.solicitacao?.material ?? "—"}</td>
                     <td>{c.solicitacao?.origem ?? "—"}</td>
-                    <td>{c.solicitacao?.prioridade ?? "—"}</td>
                     <td>
                       <GrupoCulturaBadge grupo={c.grupo} />
                     </td>

@@ -8,7 +8,8 @@ import { GrupoCultura, ResultadoCultura } from "./cultura";
  * saída próprio.
  */
 export interface ExameFormData {
-  paciente_id: string;
+  paciente_prontuario: string;
+  paciente_nome: string;
   material: string;
   origem?: string | null;
   prioridade: Prioridade;
