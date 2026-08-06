@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 import app.db.session as db_session_module
+from app.core.rate_limit import limiter
 from app.db.session import Base, get_db
 from app.main import app
 
@@ -25,6 +26,26 @@ engine = create_engine(
     poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limiter():
+    """
+    Zera o storage (em memória) do rate limiter de login antes de cada
+    teste.
+
+    Sem isso, o limite de "5/minute" configurado no endpoint de login
+    (ver app/core/rate_limit.py) é global por IP dentro do processo -
+    como a suíte inteira faz dezenas de logins (fixture
+    `authenticated_client` é usada em quase todo teste de módulo
+    clínico), sem reset ela estouraria o limite em algum teste no meio
+    do caminho e derrubaria a suíte inteira com 429s inesperados. O
+    teste que valida o rate limit em si (`test_login_com_muitas_tentativas_retorna_429`
+    em test_auth.py) também depende desse reset para começar cada
+    execução com a cota zerada.
+    """
+    limiter.reset()
+    yield
 
 
 @pytest.fixture()

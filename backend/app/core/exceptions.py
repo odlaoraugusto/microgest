@@ -4,11 +4,16 @@ Exceções de domínio e handlers globais.
 Garantem que qualquer erro da aplicação (esperado ou inesperado) seja
 devolvido ao frontend no mesmo contrato padrão de resposta da API.
 """
+import logging
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
 from app.core.response import error_response
+
+logger = logging.getLogger("microgest.erros")
 
 
 class NotFoundError(Exception):
@@ -70,8 +75,23 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=error_response("Erro de validação nos dados enviados.", errors),
         )
 
+    @app.exception_handler(RateLimitExceeded)
+    async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content=error_response(
+                "Muitas tentativas de login. Tente novamente em instantes."
+            ),
+        )
+
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception):
+        # Loga o stack trace completo no servidor para investigação futura -
+        # o cliente continua recebendo só a mensagem genérica abaixo, sem
+        # vazar detalhe nenhum da exceção (stack trace, query, etc.).
+        logger.exception(
+            "Erro não tratado em %s %s", request.method, request.url.path
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=error_response("Erro interno no servidor."),

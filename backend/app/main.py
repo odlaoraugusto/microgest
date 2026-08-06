@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.audit_middleware import AuditoriaMiddleware
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
+from app.core.rate_limit import limiter
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.routers import (
     antibiograma_router,
@@ -57,6 +58,12 @@ app.add_middleware(AuditoriaMiddleware)
 
 # Headers de segurança defensivos (Sprint 14)
 app.add_middleware(SecurityHeadersMiddleware)
+
+# Rate limiting (Sprint 15) - o Limiter fica em app.state para o decorator
+# @limiter.limit(...) usado nas rotas conseguir localizá-lo em tempo de
+# requisição; o handler de RateLimitExceeded é registrado junto com os
+# demais em register_exception_handlers.
+app.state.limiter = limiter
 
 register_exception_handlers(app)
 

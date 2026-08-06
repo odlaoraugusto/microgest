@@ -4,11 +4,12 @@ Router do módulo de Autenticação (Sprint 12).
 Usa OAuth2PasswordRequestForm (padrão do FastAPI/Swagger) no login, o
 que permite inclusive testar o login diretamente pela tela do /docs.
 """
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user
+from app.core.rate_limit import limiter
 from app.core.response import success_response
 from app.db.session import get_db
 from app.models.usuario import Usuario
@@ -19,8 +20,11 @@ router = APIRouter(prefix="/api/auth", tags=["Autenticação"])
 
 
 @router.post("/login")
+@limiter.limit("5/minute")
 def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
 ):
     service = AuthService(db)
     # OAuth2PasswordRequestForm usa o campo "username" - aqui ele carrega o e-mail.

@@ -1,7 +1,7 @@
 """
 Repository do módulo Usuários.
 """
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.usuario import Usuario
@@ -13,7 +13,12 @@ class UsuarioRepository(BaseRepository[Usuario]):
         super().__init__(db, Usuario)
 
     def get_by_email(self, email: str) -> Usuario | None:
-        stmt = select(Usuario).where(Usuario.email.ilike(email))
+        # Comparação case-insensitive EXATA - de propósito não usa .ilike(),
+        # que interpreta "%" e "_" como wildcard SQL. Como o login vem via
+        # OAuth2PasswordRequestForm (sem validação de formato de e-mail), um
+        # username com "%"/"_" viraria wildcard e poderia casar com uma
+        # conta diferente da que o usuário digitou.
+        stmt = select(Usuario).where(func.lower(Usuario.email) == email.lower())
         return self.db.scalars(stmt).first()
 
     def existe_algum_usuario(self) -> bool:
