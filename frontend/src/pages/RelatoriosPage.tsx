@@ -78,6 +78,8 @@ export default function RelatoriosPage() {
   const [setoresCatalogo, setSetoresCatalogo] = useState<string[]>([]);
   const [baixandoCcih, setBaixandoCcih] = useState(false);
   const [erroCcih, setErroCcih] = useState<string | null>(null);
+  const [baixandoCcihVigilancia, setBaixandoCcihVigilancia] = useState(false);
+  const [erroCcihVigilancia, setErroCcihVigilancia] = useState<string | null>(null);
 
   useEffect(() => {
     listarSetores().then((res) => setSetoresCatalogo(res.items.map((s) => s.nome)));
@@ -94,6 +96,24 @@ export default function RelatoriosPage() {
       setErroCcih(await extrairMensagemErroDownload(err));
     } finally {
       setBaixandoCcih(false);
+    }
+  }
+
+  async function handleBaixarCcihVigilancia() {
+    setBaixandoCcihVigilancia(true);
+    setErroCcihVigilancia(null);
+    try {
+      const params: Record<string, string> = { data_inicio: dataInicio, data_fim: dataFim };
+      if (setor) params.origem = setor;
+      await baixarArquivo(
+        "/api/relatorios/ccih-vigilancia.pdf",
+        "microgest_relatorio_ccih_vigilancia.pdf",
+        params
+      );
+    } catch (err: unknown) {
+      setErroCcihVigilancia(await extrairMensagemErroDownload(err));
+    } finally {
+      setBaixandoCcihVigilancia(false);
     }
   }
 
@@ -129,11 +149,12 @@ export default function RelatoriosPage() {
         />
       </div>
 
-      <div className="mg-card" style={{ maxWidth: 520 }}>
+      <div className="mg-card" style={{ maxWidth: 560 }}>
         <h3 style={{ marginTop: 0 }}>Relatório CCIH (PDF)</h3>
         <p style={{ color: "var(--mg-cinza-600)", fontSize: 14 }}>
-          Relatório consolidado pronto para a reunião da CCIH: resumo geral, distribuição por
-          setor, perfil microbiológico e mapa de resistência do período selecionado.
+          Resumo geral, distribuição por setor, perfil microbiológico e mapa de resistência do
+          período selecionado — calculado pela data da coleta. As culturas de vigilância ficam de
+          fora deste relatório (têm o relatório dedicado abaixo).
         </p>
 
         <div className="mg-form-grid" style={{ marginBottom: 16 }}>
@@ -159,8 +180,24 @@ export default function RelatoriosPage() {
         </div>
 
         {erroCcih && <p style={{ color: "var(--mg-erro)", fontSize: 13 }}>{erroCcih}</p>}
-        <button className="mg-btn mg-btn-primary" onClick={handleBaixarCcih} disabled={baixandoCcih}>
-          {baixandoCcih ? "Baixando..." : "Baixar relatório .pdf"}
+        <button
+          className="mg-btn mg-btn-primary"
+          onClick={handleBaixarCcih}
+          disabled={baixandoCcih}
+          style={{ marginBottom: 10 }}
+        >
+          {baixandoCcih ? "Baixando..." : "Baixar relatório geral .pdf"}
+        </button>
+
+        {erroCcihVigilancia && (
+          <p style={{ color: "var(--mg-erro)", fontSize: 13 }}>{erroCcihVigilancia}</p>
+        )}
+        <button
+          className="mg-btn mg-btn-outline"
+          onClick={handleBaixarCcihVigilancia}
+          disabled={baixandoCcihVigilancia}
+        >
+          {baixandoCcihVigilancia ? "Baixando..." : "Baixar relatório de vigilância .pdf"}
         </button>
       </div>
     </MainLayout>

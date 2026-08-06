@@ -9,7 +9,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
-from app.models.cultura import ResultadoCulturaEnum
+from app.models.cultura import GrupoCulturaEnum, ResultadoCulturaEnum
 from app.repositories.ccih_repository import CCIHRepository
 from app.schemas.ccih import (
     DistribuicaoSetorOut,
@@ -17,6 +17,14 @@ from app.schemas.ccih import (
     PerfilMicrobiologicoOut,
     TaxaResistenciaOut,
 )
+
+# Todo grupo de cultura, exceto vigilância - usado no relatório "geral" pra
+# não misturar cultura de vigilância (rastreio/colonização) com indicadores
+# de infecção. Vigilância tem seu próprio relatório dedicado.
+GRUPOS_GERAL = [
+    g for g in GrupoCulturaEnum if g != GrupoCulturaEnum.VIGILANCIA
+]
+GRUPOS_VIGILANCIA = [GrupoCulturaEnum.VIGILANCIA]
 
 
 def _primeiro_dia_do_mes(referencia: date) -> date:
@@ -33,17 +41,38 @@ class CCIHService:
         data_fim: date | None = None,
         origem: str | None = None,
     ) -> IndicadoresCCIHOut:
+        """Indicadores gerais - todas as culturas, exceto as de vigilância."""
+        return self._calcular(data_inicio, data_fim, origem, grupos=GRUPOS_GERAL)
+
+    def indicadores_vigilancia(
+        self,
+        data_inicio: date | None = None,
+        data_fim: date | None = None,
+        origem: str | None = None,
+    ) -> IndicadoresCCIHOut:
+        """Indicadores dedicados às culturas de vigilância (rastreio/colonização)."""
+        return self._calcular(data_inicio, data_fim, origem, grupos=GRUPOS_VIGILANCIA)
+
+    def _calcular(
+        self,
+        data_inicio: date | None,
+        data_fim: date | None,
+        origem: str | None,
+        grupos: list[GrupoCulturaEnum],
+    ) -> IndicadoresCCIHOut:
         hoje = date.today()
         inicio = data_inicio or _primeiro_dia_do_mes(hoje)
         fim = data_fim or hoje
 
-        total_solicitacoes = self.repository.total_solicitacoes(inicio, fim, origem=origem)
+        total_solicitacoes = self.repository.total_solicitacoes(
+            inicio, fim, origem=origem, grupos=grupos
+        )
 
         total_finalizadas = self.repository.total_culturas_por_resultado(
-            inicio, fim, origem=origem
+            inicio, fim, origem=origem, grupos=grupos
         )
         total_positivas = self.repository.total_culturas_por_resultado(
-            inicio, fim, resultado=ResultadoCulturaEnum.POSITIVA, origem=origem
+            inicio, fim, resultado=ResultadoCulturaEnum.POSITIVA, origem=origem, grupos=grupos
         )
 
         taxa_positividade = (
@@ -52,13 +81,17 @@ class CCIHService:
             else 0.0
         )
 
-        distribuicao_raw = self.repository.distribuicao_por_setor(inicio, fim, origem=origem)
+        distribuicao_raw = self.repository.distribuicao_por_setor(
+            inicio, fim, origem=origem, grupos=grupos
+        )
         distribuicao = [
             DistribuicaoSetorOut(setor=setor, total_positivas=total)
             for setor, total in distribuicao_raw
         ]
 
-        perfil_raw = self.repository.perfil_microbiologico(inicio, fim, origem=origem)
+        perfil_raw = self.repository.perfil_microbiologico(
+            inicio, fim, origem=origem, grupos=grupos
+        )
         total_isolados = sum(qtd for _, qtd in perfil_raw)
         perfil = [
             PerfilMicrobiologicoOut(
@@ -71,7 +104,9 @@ class CCIHService:
             for nome, quantidade in perfil_raw
         ]
 
-        resistencia_raw = self.repository.taxa_resistencia(inicio, fim, origem=origem)
+        resistencia_raw = self.repository.taxa_resistencia(
+            inicio, fim, origem=origem, grupos=grupos
+        )
         resistencia = [
             TaxaResistenciaOut(
                 antimicrobiano=nome,

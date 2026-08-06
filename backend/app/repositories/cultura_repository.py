@@ -11,7 +11,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.antibiograma import Antibiograma, AntibiogramaResultado
-from app.models.cultura import Cultura, CulturaMicrorganismo, ResultadoCulturaEnum
+from app.models.cultura import Cultura, CulturaMicrorganismo, GrupoCulturaEnum, ResultadoCulturaEnum
 from app.repositories.base import BaseRepository
 
 
@@ -36,6 +36,7 @@ class CulturaRepository(BaseRepository[Cultura]):
         self,
         solicitacao_id: uuid.UUID | None = None,
         resultado: ResultadoCulturaEnum | None = None,
+        grupo: GrupoCulturaEnum | None = None,
         skip: int = 0,
         limit: int = 20,
     ) -> tuple[list[Cultura], int]:
@@ -54,6 +55,8 @@ class CulturaRepository(BaseRepository[Cultura]):
             stmt = stmt.where(Cultura.solicitacao_id == solicitacao_id)
         if resultado:
             stmt = stmt.where(Cultura.resultado == resultado)
+        if grupo:
+            stmt = stmt.where(Cultura.grupo == grupo)
 
         total = len(self.db.scalars(stmt).unique().all())
         items = (

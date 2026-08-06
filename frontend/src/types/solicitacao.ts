@@ -38,5 +38,6 @@ export interface SolicitacaoFormData {
   origem?: string | null;
   prioridade: Prioridade;
   status?: StatusSolicitacao;
+  data_coleta?: string | null;
   observacoes?: string | null;
 }

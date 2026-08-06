@@ -5,10 +5,11 @@ import SolicitacaoSelect from "../components/SolicitacaoSelect";
 import MicrorganismoMultiSelect from "../components/MicrorganismoMultiSelect";
 import { atualizarCultura, criarCultura, obterCultura } from "../services/culturaService";
 import { extrairMensagemErro } from "../services/api";
-import { CulturaFormData, ResultadoCultura } from "../types/cultura";
+import { CulturaFormData, GrupoCultura, ResultadoCultura } from "../types/cultura";
 
 const FORM_INICIAL: CulturaFormData = {
   solicitacao_id: "",
+  grupo: "CULTURA_GERAL",
   resultado: "EM_ANALISE",
   observacoes: "",
   microrganismo_ids: [],
@@ -20,6 +21,14 @@ const RESULTADO_OPCOES: ResultadoCultura[] = [
   "POSITIVA",
   "NEGATIVA",
   "CONTAMINADA",
+];
+
+const GRUPO_OPCOES: { valor: GrupoCultura; label: string }[] = [
+  { valor: "HEMOCULTURA", label: "Hemocultura" },
+  { valor: "CULTURA_GERAL", label: "Cultura Geral" },
+  { valor: "VIGILANCIA", label: "Cultura de Vigilância" },
+  { valor: "BK", label: "Cultura para BK" },
+  { valor: "FUNGOS", label: "Cultura para Fungos" },
 ];
 
 export default function CulturaFormPage() {
@@ -38,6 +47,7 @@ export default function CulturaFormPage() {
       .then((c) =>
         setForm({
           solicitacao_id: c.solicitacao_id,
+          grupo: c.grupo,
           resultado: c.resultado,
           observacoes: c.observacoes ?? "",
           microrganismo_ids: c.microrganismos.map((m) => m.microrganismo.id),
@@ -113,6 +123,20 @@ export default function CulturaFormPage() {
                     onChange={(v) => handleChange("solicitacao_id", v)}
                   />
                 )}
+              </div>
+
+              <div className="mg-field">
+                <label>Grupo</label>
+                <select
+                  value={form.grupo}
+                  onChange={(e) => handleChange("grupo", e.target.value as GrupoCultura)}
+                >
+                  {GRUPO_OPCOES.map((g) => (
+                    <option key={g.valor} value={g.valor}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mg-field">

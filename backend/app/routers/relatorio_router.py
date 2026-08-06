@@ -63,3 +63,15 @@ def exportar_ccih_pdf(
     service = RelatorioService(db)
     conteudo = service.gerar_pdf_ccih(data_inicio, data_fim, origem=origem)
     return _download(conteudo, PDF_MEDIA_TYPE, "microgest_relatorio_ccih.pdf")
+
+
+@router.get("/ccih-vigilancia.pdf")
+def exportar_ccih_vigilancia_pdf(
+    data_inicio: date | None = Query(default=None),
+    data_fim: date | None = Query(default=None),
+    origem: str | None = Query(default=None, description="Filtra por setor/origem da solicitação"),
+    db: Session = Depends(get_db),
+):
+    service = RelatorioService(db)
+    conteudo = service.gerar_pdf_ccih(data_inicio, data_fim, origem=origem, vigilancia=True)
+    return _download(conteudo, PDF_MEDIA_TYPE, "microgest_relatorio_ccih_vigilancia.pdf")

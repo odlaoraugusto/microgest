@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import ResultadoCulturaBadge from "../components/ResultadoCulturaBadge";
+import GrupoCulturaBadge from "../components/GrupoCulturaBadge";
 import { liberarExame, listarExames, removerExame } from "../services/exameService";
 import { listarResultadosParciais } from "../services/culturaService";
 import { extrairMensagemErro } from "../services/api";
@@ -118,6 +119,7 @@ export default function ExamesListPage() {
                   <th>Material</th>
                   <th>Origem</th>
                   <th>Prioridade</th>
+                  <th>Grupo</th>
                   <th>Resultado</th>
                   <th>Microrganismos</th>
                   <th>Liberado</th>
@@ -131,6 +133,9 @@ export default function ExamesListPage() {
                     <td>{c.solicitacao?.material ?? "—"}</td>
                     <td>{c.solicitacao?.origem ?? "—"}</td>
                     <td>{c.solicitacao?.prioridade ?? "—"}</td>
+                    <td>
+                      <GrupoCulturaBadge grupo={c.grupo} />
+                    </td>
                     <td>
                       <ResultadoCulturaBadge resultado={c.resultado} />
                     </td>
@@ -199,6 +204,7 @@ export default function ExamesListPage() {
                   <th>Material</th>
                   <th>Origem</th>
                   <th>Prioridade</th>
+                  <th>Grupo</th>
                   <th>Resultado Atual</th>
                   <th>Previsão de Liberação</th>
                   <th>Pendência</th>
@@ -212,6 +218,9 @@ export default function ExamesListPage() {
                     <td>{c.solicitacao?.material ?? "—"}</td>
                     <td>{c.solicitacao?.origem ?? "—"}</td>
                     <td>{c.solicitacao?.prioridade ?? "—"}</td>
+                    <td>
+                      <GrupoCulturaBadge grupo={c.grupo} />
+                    </td>
                     <td>
                       <ResultadoCulturaBadge resultado={c.resultado} />
                     </td>

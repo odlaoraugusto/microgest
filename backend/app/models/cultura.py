@@ -26,11 +26,25 @@ class ResultadoCulturaEnum(str, enum.Enum):
     CONTAMINADA = "CONTAMINADA"
 
 
+class GrupoCulturaEnum(str, enum.Enum):
+    HEMOCULTURA = "HEMOCULTURA"
+    CULTURA_GERAL = "CULTURA_GERAL"
+    VIGILANCIA = "VIGILANCIA"
+    BK = "BK"
+    FUNGOS = "FUNGOS"
+
+
 class Cultura(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "culturas"
 
     solicitacao_id: Mapped[uuid.UUID] = mapped_column(
         GUID(), ForeignKey("solicitacoes.id"), nullable=False, index=True
+    )
+    grupo: Mapped[GrupoCulturaEnum] = mapped_column(
+        Enum(GrupoCulturaEnum, name="grupo_cultura_enum"),
+        default=GrupoCulturaEnum.CULTURA_GERAL,
+        nullable=False,
+        index=True,
     )
     resultado: Mapped[ResultadoCulturaEnum] = mapped_column(
         Enum(ResultadoCulturaEnum, name="resultado_cultura_enum"),

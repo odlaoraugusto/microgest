@@ -3,6 +3,8 @@ import { Microrganismo } from "./microrganismo";
 
 export type ResultadoCultura = "EM_ANALISE" | "POSITIVA" | "NEGATIVA" | "CONTAMINADA";
 
+export type GrupoCultura = "HEMOCULTURA" | "CULTURA_GERAL" | "VIGILANCIA" | "BK" | "FUNGOS";
+
 export interface CulturaMicrorganismo {
   id: string;
   microrganismo: Microrganismo;
@@ -12,6 +14,7 @@ export interface Cultura {
   id: string;
   solicitacao_id: string;
   solicitacao: Solicitacao | null;
+  grupo: GrupoCultura;
   resultado: ResultadoCultura;
   liberado_tecnicamente: boolean;
   data_liberacao: string | null;
@@ -41,6 +44,7 @@ export interface CulturaListagem {
 
 export interface CulturaFormData {
   solicitacao_id: string;
+  grupo: GrupoCultura;
   resultado: ResultadoCultura;
   observacoes?: string | null;
   microrganismo_ids: string[];

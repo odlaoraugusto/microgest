@@ -18,6 +18,7 @@ const FORM_INICIAL: SolicitacaoFormData = {
   origem: "",
   prioridade: "ROTINA",
   status: "AGUARDANDO_COLETA",
+  data_coleta: "",
   observacoes: "",
 };
 
@@ -57,6 +58,7 @@ export default function SolicitacaoFormPage() {
           origem: s.origem ?? "",
           prioridade: s.prioridade,
           status: s.status,
+          data_coleta: s.data_coleta ? s.data_coleta.slice(0, 10) : "",
           observacoes: s.observacoes ?? "",
         })
       )
@@ -71,6 +73,18 @@ export default function SolicitacaoFormPage() {
     setForm((prev) => ({ ...prev, [campo]: valor }));
   }
 
+  // Ao marcar como "Coletado" sem data de coleta preenchida, sugere a data de hoje.
+  function handleStatusChange(status: StatusSolicitacao) {
+    setForm((prev) => ({
+      ...prev,
+      status,
+      data_coleta:
+        status === "COLETADO" && !prev.data_coleta
+          ? new Date().toISOString().slice(0, 10)
+          : prev.data_coleta,
+    }));
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSalvando(true);
@@ -79,6 +93,7 @@ export default function SolicitacaoFormPage() {
       const payload = {
         ...form,
         origem: form.origem || null,
+        data_coleta: form.data_coleta || null,
         observacoes: form.observacoes || null,
       };
       if (editando && id) {
@@ -175,9 +190,7 @@ export default function SolicitacaoFormPage() {
                   <label>Status</label>
                   <select
                     value={form.status}
-                    onChange={(e) =>
-                      handleChange("status", e.target.value as StatusSolicitacao)
-                    }
+                    onChange={(e) => handleStatusChange(e.target.value as StatusSolicitacao)}
                   >
                     {STATUS_OPCOES.map((s) => (
                       <option key={s} value={s}>
@@ -187,6 +200,19 @@ export default function SolicitacaoFormPage() {
                   </select>
                 </div>
               )}
+
+              <div className="mg-field">
+                <label>Data da coleta</label>
+                <input
+                  type="date"
+                  value={form.data_coleta ?? ""}
+                  onChange={(e) => handleChange("data_coleta", e.target.value)}
+                />
+                <span style={{ fontSize: 12, color: "var(--mg-cinza-400)" }}>
+                  Usada para atribuir a solicitação, culturas e resultados ao mês correto nos
+                  relatórios.
+                </span>
+              </div>
 
               <div className="mg-field" style={{ gridColumn: "1 / -1" }}>
                 <label>Observações</label>

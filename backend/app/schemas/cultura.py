@@ -6,13 +6,14 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.cultura import ResultadoCulturaEnum
+from app.models.cultura import GrupoCulturaEnum, ResultadoCulturaEnum
 from app.schemas.microrganismo import MicrorganismoOut
 from app.schemas.solicitacao import SolicitacaoOut
 
 
 class CulturaCreate(BaseModel):
     solicitacao_id: uuid.UUID
+    grupo: GrupoCulturaEnum = GrupoCulturaEnum.CULTURA_GERAL
     resultado: ResultadoCulturaEnum = ResultadoCulturaEnum.EM_ANALISE
     observacoes: str | None = Field(default=None, max_length=1000)
     microrganismo_ids: list[uuid.UUID] = Field(default_factory=list)
@@ -24,6 +25,7 @@ class CulturaCreate(BaseModel):
 
 
 class CulturaUpdate(BaseModel):
+    grupo: GrupoCulturaEnum | None = None
     resultado: ResultadoCulturaEnum | None = None
     observacoes: str | None = Field(default=None, max_length=1000)
     microrganismo_ids: list[uuid.UUID] | None = None
@@ -43,6 +45,7 @@ class CulturaOut(BaseModel):
     id: uuid.UUID
     solicitacao_id: uuid.UUID
     solicitacao: SolicitacaoOut | None = None
+    grupo: GrupoCulturaEnum
     resultado: ResultadoCulturaEnum
     liberado_tecnicamente: bool
     data_liberacao: datetime | None

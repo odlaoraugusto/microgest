@@ -17,7 +17,7 @@ from datetime import date, datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import BusinessRuleError, NotFoundError
-from app.models.cultura import Cultura, ResultadoCulturaEnum
+from app.models.cultura import Cultura, GrupoCulturaEnum, ResultadoCulturaEnum
 from app.repositories.cultura_repository import CulturaRepository
 from app.repositories.parametro_sistema_repository import ParametroSistemaRepository
 from app.repositories.solicitacao_repository import SolicitacaoRepository
@@ -36,12 +36,17 @@ class CulturaService:
         self,
         solicitacao_id: uuid.UUID | None,
         resultado: ResultadoCulturaEnum | None,
+        grupo: GrupoCulturaEnum | None = None,
         page: int = 1,
         page_size: int = 20,
     ):
         skip = (page - 1) * page_size
         return self.repository.search(
-            solicitacao_id=solicitacao_id, resultado=resultado, skip=skip, limit=page_size
+            solicitacao_id=solicitacao_id,
+            resultado=resultado,
+            grupo=grupo,
+            skip=skip,
+            limit=page_size,
         )
 
     def obter(self, cultura_id: uuid.UUID):
@@ -76,6 +81,7 @@ class CulturaService:
         cultura = self.repository.create(
             {
                 "solicitacao_id": dados.solicitacao_id,
+                "grupo": dados.grupo,
                 "resultado": dados.resultado,
                 "observacoes": dados.observacoes,
                 "previsao_liberacao": dados.previsao_liberacao

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
-import { obterIndicadoresCCIH } from "../services/ccihService";
+import { obterIndicadoresCCIH, obterIndicadoresCCIHVigilancia } from "../services/ccihService";
 import { listarSetores } from "../services/setorService";
 import { IndicadoresCCIH } from "../types/ccih";
+
+type Visao = "geral" | "vigilancia";
 
 function hojeISO() {
   return new Date().toISOString().slice(0, 10);
@@ -37,6 +39,7 @@ function BarraPercentual({ percentual, cor }: { percentual: number; cor: string 
 }
 
 export default function CcihPage() {
+  const [visao, setVisao] = useState<Visao>("geral");
   const [dataInicio, setDataInicio] = useState(primeiroDiaDoMesISO());
   const [dataFim, setDataFim] = useState(hojeISO());
   const [setor, setSetor] = useState("");
@@ -49,7 +52,8 @@ export default function CcihPage() {
     setCarregando(true);
     setErro(null);
     try {
-      const resultado = await obterIndicadoresCCIH(dataInicio, dataFim, setor || undefined);
+      const buscar = visao === "vigilancia" ? obterIndicadoresCCIHVigilancia : obterIndicadoresCCIH;
+      const resultado = await buscar(dataInicio, dataFim, setor || undefined);
       setIndicadores(resultado);
     } catch {
       setErro(
@@ -61,15 +65,35 @@ export default function CcihPage() {
     }
   }
 
-  // Carrega os indicadores do período padrão (mês corrente) uma vez, na montagem.
+  // Recarrega ao trocar de visão (Geral / Vigilância) e uma vez na montagem.
   useEffect(() => {
     carregar();
-    listarSetores().then((res) => setSetoresCatalogo(res.items.map((s) => s.nome)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visao]);
+
+  useEffect(() => {
+    listarSetores().then((res) => setSetoresCatalogo(res.items.map((s) => s.nome)));
   }, []);
 
   return (
     <MainLayout titulo="CCIH" subtitulo="Indicadores epidemiológicos e perfil de resistência">
+      <div className="mg-page-header" style={{ marginBottom: 10 }}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            className={`mg-btn ${visao === "geral" ? "mg-btn-primary" : "mg-btn-outline"}`}
+            onClick={() => setVisao("geral")}
+          >
+            Geral
+          </button>
+          <button
+            className={`mg-btn ${visao === "vigilancia" ? "mg-btn-primary" : "mg-btn-outline"}`}
+            onClick={() => setVisao("vigilancia")}
+          >
+            Cultura de Vigilância
+          </button>
+        </div>
+      </div>
+
       <div className="mg-page-header">
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <div className="mg-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>

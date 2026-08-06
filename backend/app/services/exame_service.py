@@ -26,8 +26,20 @@ from app.services.solicitacao_service import SolicitacaoService
 # service correto. Os nomes "observacoes_solicitacao"/"observacoes_cultura"
 # existem só para desambiguar as duas origens no schema compartilhado;
 # ambos mapeiam para o campo "observacoes" de cada entidade.
-_CAMPOS_SOLICITACAO = {"material", "origem", "prioridade", "observacoes_solicitacao"}
-_CAMPOS_CULTURA = {"resultado", "microrganismo_ids", "previsao_liberacao", "observacoes_cultura"}
+_CAMPOS_SOLICITACAO = {
+    "material",
+    "origem",
+    "prioridade",
+    "data_coleta",
+    "observacoes_solicitacao",
+}
+_CAMPOS_CULTURA = {
+    "grupo",
+    "resultado",
+    "microrganismo_ids",
+    "previsao_liberacao",
+    "observacoes_cultura",
+}
 
 
 class ExameService:
@@ -55,7 +67,7 @@ class ExameService:
             origem=dados.origem,
             prioridade=dados.prioridade,
             status=StatusSolicitacaoEnum.COLETADO,
-            data_coleta=datetime.now(timezone.utc),
+            data_coleta=dados.data_coleta or datetime.now(timezone.utc),
             observacoes=dados.observacoes_solicitacao,
         )
         solicitacao = self.solicitacao_service.criar(solicitacao_dados)
@@ -64,6 +76,7 @@ class ExameService:
         # microrganismos-só-se-positiva e o cálculo de previsão automática.
         cultura_dados = CulturaCreate(
             solicitacao_id=solicitacao.id,
+            grupo=dados.grupo,
             resultado=dados.resultado,
             observacoes=dados.observacoes_cultura,
             microrganismo_ids=dados.microrganismo_ids,

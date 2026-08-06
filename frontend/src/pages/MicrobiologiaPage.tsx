@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import ResultadoCulturaBadge from "../components/ResultadoCulturaBadge";
+import GrupoCulturaBadge from "../components/GrupoCulturaBadge";
 import {
   liberarCultura,
   listarCulturas,
@@ -112,6 +113,7 @@ export default function MicrobiologiaPage() {
                 <tr>
                   <th>Paciente</th>
                   <th>Material</th>
+                  <th>Grupo</th>
                   <th>Resultado</th>
                   <th>Microrganismos</th>
                   <th>Liberada</th>
@@ -123,6 +125,9 @@ export default function MicrobiologiaPage() {
                   <tr key={c.id}>
                     <td>{c.solicitacao?.paciente?.nome ?? "—"}</td>
                     <td>{c.solicitacao?.material ?? "—"}</td>
+                    <td>
+                      <GrupoCulturaBadge grupo={c.grupo} />
+                    </td>
                     <td>
                       <ResultadoCulturaBadge resultado={c.resultado} />
                     </td>
@@ -189,6 +194,7 @@ export default function MicrobiologiaPage() {
                 <tr>
                   <th>Paciente</th>
                   <th>Material</th>
+                  <th>Grupo</th>
                   <th>Resultado Atual</th>
                   <th>Previsão de Liberação</th>
                   <th>Pendência</th>
@@ -200,6 +206,9 @@ export default function MicrobiologiaPage() {
                   <tr key={c.id}>
                     <td>{c.solicitacao?.paciente?.nome ?? "—"}</td>
                     <td>{c.solicitacao?.material ?? "—"}</td>
+                    <td>
+                      <GrupoCulturaBadge grupo={c.grupo} />
+                    </td>
                     <td>
                       <ResultadoCulturaBadge resultado={c.resultado} />
                     </td>

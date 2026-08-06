@@ -12,11 +12,11 @@ Não há um `ExameOut` próprio: a resposta de todos os endpoints reutiliza
 Solicitação aninhada É a representação completa de um "exame".
 """
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
-from app.models.cultura import ResultadoCulturaEnum
+from app.models.cultura import GrupoCulturaEnum, ResultadoCulturaEnum
 from app.models.solicitacao import PrioridadeEnum
 
 
@@ -26,9 +26,15 @@ class ExameCreate(BaseModel):
     material: str = Field(..., min_length=2, max_length=100)
     origem: str | None = Field(default=None, max_length=100)
     prioridade: PrioridadeEnum = PrioridadeEnum.ROTINA
+    data_coleta: datetime | None = Field(
+        default=None,
+        description="Se não informada, usa o momento do cadastro (assume que a "
+        "coleta acabou de acontecer).",
+    )
     observacoes_solicitacao: str | None = Field(default=None, max_length=1000)
 
     # Campos da Cultura
+    grupo: GrupoCulturaEnum = GrupoCulturaEnum.CULTURA_GERAL
     resultado: ResultadoCulturaEnum = ResultadoCulturaEnum.EM_ANALISE
     microrganismo_ids: list[uuid.UUID] = Field(default_factory=list)
     previsao_liberacao: date | None = Field(
@@ -46,9 +52,11 @@ class ExameUpdate(BaseModel):
     material: str | None = Field(default=None, min_length=2, max_length=100)
     origem: str | None = Field(default=None, max_length=100)
     prioridade: PrioridadeEnum | None = None
+    data_coleta: datetime | None = None
     observacoes_solicitacao: str | None = Field(default=None, max_length=1000)
 
     # Campos da Cultura
+    grupo: GrupoCulturaEnum | None = None
     resultado: ResultadoCulturaEnum | None = None
     microrganismo_ids: list[uuid.UUID] | None = None
     previsao_liberacao: date | None = None

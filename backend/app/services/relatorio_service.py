@@ -92,6 +92,7 @@ class RelatorioService:
                 "Prioridade",
                 "Status",
                 "Data da Solicitação",
+                "Data da Coleta",
             ],
         )
 
@@ -106,6 +107,7 @@ class RelatorioService:
                     s.prioridade.value,
                     s.status.value,
                     s.data_solicitacao.strftime("%d/%m/%Y"),
+                    s.data_coleta.strftime("%d/%m/%Y") if s.data_coleta else "—",
                 ]
             )
 
@@ -123,6 +125,7 @@ class RelatorioService:
                 "Paciente",
                 "Prontuário",
                 "Material",
+                "Grupo",
                 "Resultado Atual",
                 "Microrganismo(s)",
                 "Previsão de Liberação",
@@ -148,6 +151,7 @@ class RelatorioService:
                     paciente.nome if paciente else "",
                     paciente.prontuario if paciente else "",
                     cultura.solicitacao.material if cultura.solicitacao else "",
+                    cultura.grupo.value,
                     cultura.resultado.value,
                     nomes_micro,
                     previsao,
@@ -160,9 +164,22 @@ class RelatorioService:
         return buffer.getvalue()
 
     def gerar_pdf_ccih(
-        self, data_inicio: date | None, data_fim: date | None, origem: str | None = None
+        self,
+        data_inicio: date | None,
+        data_fim: date | None,
+        origem: str | None = None,
+        vigilancia: bool = False,
     ) -> bytes:
-        indicadores = self.ccih_service.indicadores(data_inicio, data_fim, origem=origem)
+        indicadores = (
+            self.ccih_service.indicadores_vigilancia(data_inicio, data_fim, origem=origem)
+            if vigilancia
+            else self.ccih_service.indicadores(data_inicio, data_fim, origem=origem)
+        )
+        titulo = (
+            "MicroGest — Relatório CCIH (Cultura de Vigilância)"
+            if vigilancia
+            else "MicroGest — Relatório CCIH"
+        )
         styles = getSampleStyleSheet()
 
         buffer = io.BytesIO()
@@ -176,7 +193,7 @@ class RelatorioService:
         )
 
         cabecalho_texto = [
-            Paragraph("MicroGest — Relatório CCIH", styles["Title"]),
+            Paragraph(titulo, styles["Title"]),
             Paragraph(
                 f"Período: {indicadores.periodo_inicio.strftime('%d/%m/%Y')} a "
                 f"{indicadores.periodo_fim.strftime('%d/%m/%Y')}",

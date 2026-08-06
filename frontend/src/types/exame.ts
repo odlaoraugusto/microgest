@@ -1,5 +1,5 @@
 import { Prioridade } from "./solicitacao";
-import { ResultadoCultura } from "./cultura";
+import { GrupoCultura, ResultadoCultura } from "./cultura";
 
 /**
  * Payload do módulo Exames: compõe Solicitação + Cultura numa única
@@ -12,7 +12,9 @@ export interface ExameFormData {
   material: string;
   origem?: string | null;
   prioridade: Prioridade;
+  data_coleta?: string | null;
   observacoes_solicitacao?: string | null;
+  grupo: GrupoCultura;
   resultado: ResultadoCultura;
   microrganismo_ids: string[];
   previsao_liberacao?: string | null;

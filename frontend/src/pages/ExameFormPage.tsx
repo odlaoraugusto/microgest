@@ -8,7 +8,7 @@ import { listarAntibiogramas } from "../services/antibiogramaService";
 import { listarMateriais } from "../services/materialService";
 import { listarSetores } from "../services/setorService";
 import { extrairMensagemErro } from "../services/api";
-import { CulturaMicrorganismo, ResultadoCultura } from "../types/cultura";
+import { CulturaMicrorganismo, GrupoCultura, ResultadoCultura } from "../types/cultura";
 import { ExameFormData } from "../types/exame";
 import { Antibiograma } from "../types/antibiograma";
 
@@ -17,7 +17,9 @@ const FORM_INICIAL: ExameFormData = {
   material: "",
   origem: "",
   prioridade: "ROTINA",
+  data_coleta: "",
   observacoes_solicitacao: "",
+  grupo: "CULTURA_GERAL",
   resultado: "EM_ANALISE",
   microrganismo_ids: [],
   previsao_liberacao: "",
@@ -29,6 +31,14 @@ const RESULTADO_OPCOES: ResultadoCultura[] = [
   "POSITIVA",
   "NEGATIVA",
   "CONTAMINADA",
+];
+
+const GRUPO_OPCOES: { valor: GrupoCultura; label: string }[] = [
+  { valor: "HEMOCULTURA", label: "Hemocultura" },
+  { valor: "CULTURA_GERAL", label: "Cultura Geral" },
+  { valor: "VIGILANCIA", label: "Cultura de Vigilância" },
+  { valor: "BK", label: "Cultura para BK" },
+  { valor: "FUNGOS", label: "Cultura para Fungos" },
 ];
 
 export default function ExameFormPage() {
@@ -65,7 +75,9 @@ export default function ExameFormPage() {
           material: c.solicitacao?.material ?? "",
           origem: c.solicitacao?.origem ?? "",
           prioridade: c.solicitacao?.prioridade ?? "ROTINA",
+          data_coleta: c.solicitacao?.data_coleta ? c.solicitacao.data_coleta.slice(0, 10) : "",
           observacoes_solicitacao: c.solicitacao?.observacoes ?? "",
+          grupo: c.grupo,
           resultado: c.resultado,
           microrganismo_ids: c.microrganismos.map((m) => m.microrganismo.id),
           previsao_liberacao: c.previsao_liberacao ?? "",
@@ -128,6 +140,7 @@ export default function ExameFormPage() {
       const payload = {
         ...form,
         origem: form.origem || null,
+        data_coleta: form.data_coleta || null,
         observacoes_solicitacao: form.observacoes_solicitacao || null,
         previsao_liberacao: form.previsao_liberacao || null,
         observacoes_cultura: form.observacoes_cultura || null,
@@ -227,6 +240,18 @@ export default function ExameFormPage() {
                 </select>
               </div>
 
+              <div className="mg-field">
+                <label>Data da coleta</label>
+                <input
+                  type="date"
+                  value={form.data_coleta ?? ""}
+                  onChange={(e) => handleChange("data_coleta", e.target.value)}
+                />
+                <span style={{ fontSize: 12, color: "var(--mg-cinza-400)" }}>
+                  Se deixar em branco, usa a data de hoje.
+                </span>
+              </div>
+
               <div className="mg-field" style={{ gridColumn: "1 / -1" }}>
                 <label>Observações da solicitação</label>
                 <textarea
@@ -241,6 +266,20 @@ export default function ExameFormPage() {
 
             <h3 style={{ margin: "0 0 12px 0" }}>Resultado da cultura</h3>
             <div className="mg-form-grid">
+              <div className="mg-field">
+                <label>Grupo</label>
+                <select
+                  value={form.grupo}
+                  onChange={(e) => handleChange("grupo", e.target.value as GrupoCultura)}
+                >
+                  {GRUPO_OPCOES.map((g) => (
+                    <option key={g.valor} value={g.valor}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="mg-field">
                 <label>Resultado</label>
                 <select

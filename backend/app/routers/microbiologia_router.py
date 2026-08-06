@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_user
 from app.core.response import success_response
 from app.db.session import get_db
-from app.models.cultura import ResultadoCulturaEnum
+from app.models.cultura import GrupoCulturaEnum, ResultadoCulturaEnum
 from app.schemas.cultura import CulturaCreate, CulturaOut, CulturaParcialOut, CulturaUpdate
 from app.services.cultura_service import CulturaService
 
@@ -22,12 +22,15 @@ router = APIRouter(
 def listar_culturas(
     solicitacao_id: uuid.UUID | None = Query(default=None),
     resultado: ResultadoCulturaEnum | None = Query(default=None),
+    grupo: GrupoCulturaEnum | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     service = CulturaService(db)
-    items, total = service.listar(solicitacao_id, resultado, page=page, page_size=page_size)
+    items, total = service.listar(
+        solicitacao_id, resultado, grupo=grupo, page=page, page_size=page_size
+    )
     data = {
         "total": total,
         "page": page,
