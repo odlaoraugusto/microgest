@@ -40,11 +40,10 @@ export default function MicrorganismoMultiSelect({
     if (!novoNome.trim()) return;
     setCriando(true);
     try {
-      const criado = await criarMicrorganismo({
-        nome: novoNome.trim(),
-        gram: "NAO_SE_APLICA",
-        tipo: "BACTERIA",
-      });
+      // Não envia gram/tipo/etc. de propósito - deixa o backend tentar
+      // herdar a taxonomia de outra espécie já cadastrada do mesmo gênero
+      // (ver MicrorganismoFormData). Se não achar, cai nos defaults.
+      const criado = await criarMicrorganismo({ nome: novoNome.trim() });
       setNovoNome("");
       await carregar();
       onChange([...value, criado.id]);
