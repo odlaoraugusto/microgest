@@ -32,6 +32,14 @@ class TipoMicrorganismoEnum(str, enum.Enum):
     OUTRO = "OUTRO"
 
 
+class MorfologiaEnum(str, enum.Enum):
+    COCO = "COCO"
+    BACILO = "BACILO"
+    COCOBACILO = "COCOBACILO"
+    LEVEDURA = "LEVEDURA"
+    NAO_SE_APLICA = "NAO_SE_APLICA"
+
+
 class Microrganismo(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "microrganismos"
 
@@ -44,6 +52,16 @@ class Microrganismo(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
         Enum(TipoMicrorganismoEnum, name="tipo_microrganismo_enum"),
         default=TipoMicrorganismoEnum.BACTERIA,
     )
+    morfologia: Mapped[MorfologiaEnum] = mapped_column(
+        Enum(MorfologiaEnum, name="morfologia_enum"),
+        default=MorfologiaEnum.NAO_SE_APLICA,
+        nullable=False,
+    )
+    # None = "não se aplica" (só é relevante pra bacilos Gram-negativos: True =
+    # fermentador de glicose, ex.: Enterobacterales; False = não-fermentador,
+    # ex.: Pseudomonas/Acinetobacter). Nos demais grupos (Gram-positivo, fungo
+    # etc.) o campo permanece None.
+    fermentador: Mapped[bool | None] = mapped_column(nullable=True)
     familia: Mapped[str | None] = mapped_column(String(100), nullable=True)
     relevancia_clinica: Mapped[str | None] = mapped_column(String(500), nullable=True)
 

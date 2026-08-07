@@ -24,6 +24,10 @@ class MicrorganismoService:
             raise NotFoundError("Microrganismo não encontrado.")
         return microrganismo
 
+    # Campos de taxonomia/morfologia que participam da herança automática por
+    # gênero (ver docstring de `criar`).
+    _CAMPOS_HERDAVEIS = ("gram", "tipo", "morfologia", "fermentador", "familia")
+
     def criar(self, dados: MicrorganismoCreate):
         existente = self.repository.get_by_nome(dados.nome)
         if existente:
@@ -31,7 +35,39 @@ class MicrorganismoService:
                 "Já existe um microrganismo cadastrado com este nome.",
                 errors=[f"nome '{dados.nome}' já está em uso."],
             )
-        return self.repository.create(dados.model_dump())
+
+        dados_dict = dados.model_dump()
+        self._herdar_taxonomia_do_genero(dados, dados_dict)
+        return self.repository.create(dados_dict)
+
+    def _herdar_taxonomia_do_genero(
+        self, dados: MicrorganismoCreate, dados_dict: dict
+    ) -> None:
+        """"Aprendizado" incremental da base de conhecimento: se o cliente não
+        informou explicitamente NENHUM dos campos de taxonomia/morfologia
+        (gram/tipo/morfologia/fermentador/familia) e já existe algum
+        microrganismo ativo do mesmo gênero (primeira palavra do nome, ex.:
+        "Klebsiella" em "Klebsiella aerogenes") cadastrado, copiamos esses
+        campos dele em vez de usar os defaults genéricos do schema. Assim,
+        cadastrar uma nova espécie de um gênero já conhecido já nasce com
+        Gram/família corretos sem digitar nada. Se o usuário informar
+        qualquer um desses campos na requisição (mesmo que igual ao default),
+        a herança é pulada e o que foi enviado prevalece.
+        """
+        campos_informados = set(dados.model_fields_set) & set(self._CAMPOS_HERDAVEIS)
+        if campos_informados:
+            return
+
+        genero = dados.nome.strip().split(" ")[0]
+        if not genero:
+            return
+
+        referencia = self.repository.get_by_genero(genero)
+        if not referencia:
+            return
+
+        for campo in self._CAMPOS_HERDAVEIS:
+            dados_dict[campo] = getattr(referencia, campo)
 
     def atualizar(self, microrganismo_id: uuid.UUID, dados: MicrorganismoUpdate):
         microrganismo = self.obter(microrganismo_id)

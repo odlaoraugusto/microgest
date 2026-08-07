@@ -18,6 +18,21 @@ class MicrorganismoRepository(BaseRepository[Microrganismo]):
         )
         return self.db.scalars(stmt).first()
 
+    def get_by_genero(self, genero: str) -> Microrganismo | None:
+        """Primeiro microrganismo ativo cujo nome comece pelo gênero informado
+        (ex.: "Klebsiella" casa com "Klebsiella pneumoniae"). Usado pela
+        herança automática de taxonomia ao cadastrar uma espécie nova de um
+        gênero já conhecido - ver MicrorganismoService.criar."""
+        stmt = (
+            select(Microrganismo)
+            .where(
+                Microrganismo.nome.ilike(f"{genero} %"),
+                Microrganismo.is_active.is_(True),
+            )
+            .order_by(Microrganismo.nome)
+        )
+        return self.db.scalars(stmt).first()
+
     def search(
         self, termo: str | None, skip: int = 0, limit: int = 20
     ) -> tuple[list[Microrganismo], int]:

@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.microrganismo import GramEnum, TipoMicrorganismoEnum
+from app.models.microrganismo import GramEnum, MorfologiaEnum, TipoMicrorganismoEnum
 
 
 class MicrorganismoBase(BaseModel):
@@ -14,6 +14,8 @@ class MicrorganismoBase(BaseModel):
     nome_cientifico: str | None = Field(default=None, max_length=150)
     gram: GramEnum = GramEnum.NAO_SE_APLICA
     tipo: TipoMicrorganismoEnum = TipoMicrorganismoEnum.BACTERIA
+    morfologia: MorfologiaEnum = MorfologiaEnum.NAO_SE_APLICA
+    fermentador: bool | None = Field(default=None)
     familia: str | None = Field(default=None, max_length=100)
     relevancia_clinica: str | None = Field(default=None, max_length=500)
 
@@ -27,6 +29,8 @@ class MicrorganismoUpdate(BaseModel):
     nome_cientifico: str | None = Field(default=None, max_length=150)
     gram: GramEnum | None = None
     tipo: TipoMicrorganismoEnum | None = None
+    morfologia: MorfologiaEnum | None = None
+    fermentador: bool | None = None
     familia: str | None = Field(default=None, max_length=100)
     relevancia_clinica: str | None = Field(default=None, max_length=500)
 
