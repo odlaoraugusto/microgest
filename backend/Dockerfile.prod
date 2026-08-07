@@ -25,11 +25,15 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# 2 workers é um ponto de partida seguro para instâncias pequenas (ex.: 1
-# vCPU / 512MB, como no free tier de PaaS); ajuste conforme os núcleos de
-# CPU e memória disponíveis no servidor (regra geral: 2 * núcleos + 1).
+# 1 worker de propósito: o rate limiter de login (app/core/rate_limit.py)
+# guarda a contagem em memória do próprio processo - com mais de um worker,
+# cada um teria sua própria contagem e o limite de "5/minuto por IP" viraria
+# impreciso (até 5 * número de workers). Um worker uvicorn é assíncrono e dá
+# conta do volume de um laboratório sozinho; se o tráfego crescer a ponto de
+# precisar de mais workers, o limiter precisa migrar pra um storage
+# compartilhado (Redis) antes de aumentar esse número.
 CMD ["gunicorn", "app.main:app", \
-     "--workers", "2", \
+     "--workers", "1", \
      "--worker-class", "uvicorn.workers.UvicornWorker", \
      "--bind", "0.0.0.0:8000", \
      "--access-logfile", "-", \
